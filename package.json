@@ -1,0 +1,30 @@
+{
+  "name": "music-visualizer",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chsteinhauer/music-visualizer.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/chsteinhauer/music-visualizer/issues"
+  },
+  "homepage": "https://github.com/chsteinhauer/music-visualizer#readme",
+  "devDependencies": {
+    "vite": "^4.2.1"
+  },
+  "dependencies": {
+    "p5js-wrapper": "^1.2.3",
+    "sass": "^1.62.0",
+    "polar": "file:../assets/libraries/polar/polar.min.js"
+  }
+}

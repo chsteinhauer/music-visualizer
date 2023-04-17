@@ -1,8 +1,37 @@
 html, body {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
-canvas {
-    display: block;
+.wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .canvas {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+
+        canvas {
+            margin: 0 auto;
+        }
+    }
+
+    .player {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        right: 50%;
+    }
+
+    .icon {
+        width: 25px;
+        height: 25px;
+    }
 }
+

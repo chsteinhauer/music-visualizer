@@ -4,11 +4,12 @@ import { state } from "../model/state";
 function setupTest() {
     var canvas = createCanvas(800, 600);
     canvas.parent("canvas");
+    background(51);
 }
 
 function drawTest() {
-    background(255);
-    setCenter(400, 400);
+    background(51);
+    setCenter(400, 300);
 
     const freq = state.pitch;
     const midi = freqToMidi(freq);

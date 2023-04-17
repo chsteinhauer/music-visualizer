@@ -21,6 +21,10 @@ window.setup = () => {
         player.setup((context, mic) => pitch.startPitch(model_url, context, mic.stream));
 
         setup();
+
+        // example interaction with server
+        exampleFetch();
+
     } catch (err) {
         console.log(err);
     }
@@ -33,4 +37,21 @@ window.draw = () => {
     } catch (err) {
         console.log(err);
     }
+}
+
+async function exampleFetch() {
+    const res = await fetch("http://localhost:3000/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            hello: "world",
+            arr: [1,2,3,4]
+        })
+    });
+
+    const text = await res.json();
+
+    console.log(text);
 }

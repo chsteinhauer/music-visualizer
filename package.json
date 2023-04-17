@@ -5,6 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "setup": "pip install -r ./python-server/requirements.txt",
+    "server": "nodemon --exec python ./python-server/server.py",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -20,11 +22,12 @@
   },
   "homepage": "https://github.com/chsteinhauer/music-visualizer#readme",
   "devDependencies": {
+    "nodemon": "^2.0.22",
     "vite": "^4.2.1"
   },
   "dependencies": {
     "p5js-wrapper": "^1.2.3",
-    "sass": "^1.62.0",
-    "polar": "file:../assets/libraries/polar/polar.min.js"
+    "polar": "file:../assets/libraries/polar/polar.min.js",
+    "sass": "^1.62.0"
   }
 }

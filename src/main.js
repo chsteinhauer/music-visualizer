@@ -1,57 +1,59 @@
-import { PitchDetector } from "./utils/PitchDetector";
 import "p5js-wrapper";
 import 'p5js-wrapper/sound';
 import "../assets/libraries/polar/polar.min.js";
-import { state } from "./model/state";
-import { setup,draw } from "./visualizers";
-import { AudioPlayer } from "./components/AudioPlayer";
+import { State } from "./model/state";
+import { setup, draw } from "./visualizers";
+import { Player } from "./components/audio-player.js";
+import { setupLoading, drawLoading } from "./visualizers/loading.js";
+import { sources } from "./utils/api.js";
 
-const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
-let pitch;
-let player;
+let _loading = true;
 
-function update () {
-    state.pitch = pitch.getPitch();
-}
+window.setup = async () => {
 
-window.setup = () => {
     try {
-        pitch = new PitchDetector();
-        player = new AudioPlayer();
-        player.setup((context, mic) => pitch.startPitch(model_url, context, mic.stream));
+        State.setState("loading");
+        setupLoading();
+        var srcs = await sources();
+
+        for (var s of srcs) {
+            State.add({ title: s });
+        }
+
+        Player.init(() => {
+            _loading = false;
+        });
 
         setup();
-
-        // example interaction with server
-        exampleFetch();
-
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
 window.draw = () => {
     try {
-        update();
-        draw();
+        if (State.isLoading()) {
+            drawLoading(_loading, () => Player.display());
+        } else if (State.isStreaming()) {
+            draw();
+        }
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
-async function exampleFetch() {
-    const res = await fetch("http://localhost:3000/analyze", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            hello: "world",
-            arr: [1,2,3,4]
-        })
-    });
 
-    const text = await res.json();
+// Create a WebWorker for Audio Processing.
+const worker = new Worker('./components/worker.js', { type: 'module'});
 
-    console.log(text);
-}
+
+// Send FreeQueue instance and atomic state to worker.
+worker.postMessage({
+    type: 'init',
+    data: {
+        inputQueue: Player.inputQueue,
+        outputQueue: Player.outputQueue,
+        atomicState: Player.atomicState
+    }
+});
+

@@ -28,6 +28,7 @@
   "dependencies": {
     "p5js-wrapper": "^1.2.3",
     "polar": "file:../assets/libraries/polar/polar.min.js",
+    "@tensorflow/tfjs": "4.4.0",
     "sass": "^1.62.0"
   }
 }

@@ -5,26 +5,29 @@ import { State } from "./model/state";
 import { setup, draw } from "./visualizers";
 import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
-import { sources } from "./utils/api.js";
+
 
 let _loading = true;
 
 window.setup = async () => {
 
     try {
+
         State.setState("loading");
         setupLoading();
-        var srcs = await sources();
+
+        var srcs = ["vocals", "bass", "drums", "other"]; //await sources();
 
         for (var s of srcs) {
             State.add({ title: s });
         }
-
+        
         Player.init(() => {
             _loading = false;
         });
 
         setup();
+
     } catch (err) {
         console.error(err);
     }
@@ -42,10 +45,8 @@ window.draw = () => {
     }
 }
 
-
 // Create a WebWorker for Audio Processing.
 const worker = new Worker('./components/worker.js', { type: 'module'});
-
 
 // Send FreeQueue instance and atomic state to worker.
 worker.postMessage({
@@ -53,7 +54,6 @@ worker.postMessage({
     data: {
         inputQueue: Player.inputQueue,
         outputQueue: Player.outputQueue,
-        atomicState: Player.atomicState
+        atomicState: Player.atomicState,
     }
 });
-

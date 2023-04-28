@@ -18,10 +18,11 @@ def sources():
     return model.sources
 
 def seperate_batch(input):
-    mix = torch.tensor([[input,input]], dtype=torch.float).unsqueeze(dim=0) #torch.tensor([[input,input]], dtype=torch.float).unsqueeze(dim=0)
-    with torch.no_grad():
-        output = model(mix)
+    # mix = torch.tensor([[input,input]], dtype=torch.float).unsqueeze(dim=0)
+    # with torch.no_grad():
+    #     output = model(mix)
+    #print(output.size())
     
-    output = output.tolist()
-    return output;
+    #return output.tolist()
+    return [[[input,input],[input,input],[input,input],[input,input]]]
 

@@ -44,9 +44,9 @@ export const State = {
             // harmonic overtones
             overtones: [],
     
-            buffer: [],
-            // AnalyzerNode for this source
-            analyzer: null,
+            buffer: null,
+            // AnalyserNode for this source
+            analyser: null,
             // additional custom properties
             ...options,
         }

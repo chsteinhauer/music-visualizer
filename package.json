@@ -26,9 +26,10 @@
     "vite": "^4.2.1"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "4.4.0",
     "p5js-wrapper": "^1.2.3",
     "polar": "file:../assets/libraries/polar/polar.min.js",
-    "@tensorflow/tfjs": "4.4.0",
-    "sass": "^1.62.0"
+    "sass": "^1.62.0",
+    "onnxruntime-web": "^1.14.0"
   }
 }

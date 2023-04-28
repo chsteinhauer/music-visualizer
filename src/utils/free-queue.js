@@ -57,7 +57,7 @@ class FreeQueue {
             this.channelData.push(
             new Float32Array(
                 new SharedArrayBuffer(
-                this.bufferLength * Float32Array.BYTES_PER_ELEMENT
+                    this.bufferLength * Float32Array.BYTES_PER_ELEMENT
                 )
             )
             );

@@ -14,7 +14,6 @@ class AudioProcessor extends AudioWorkletProcessor{
         this.atomicState = options.processorOptions.atomicState;
         Object.setPrototypeOf(this.inputQueue, FreeQueue.prototype);
         Object.setPrototypeOf(this.outputQueue, FreeQueue.prototype);
-
     }
 
     static get parameterDescriptors() {
@@ -42,8 +41,6 @@ class AudioProcessor extends AudioWorkletProcessor{
     // }
 
     process(inputs, outputs, params) {
-
-
         var input = inputs[0];
         
         // Push data from input into inputQueue.
@@ -54,7 +51,7 @@ class AudioProcessor extends AudioWorkletProcessor{
         // // Try to pull data out of outputQueue and store it in output.
         const didPull = this.outputQueue.pull(output.flat(2), RENDER_QUANTUM);
         if (didPull) {
-            console.log(outputs);
+            //console.log(outputs);
         }
         
         // Wake up worker to process a frame of data.
@@ -70,10 +67,7 @@ class AudioProcessor extends AudioWorkletProcessor{
 
         var sr = params["sampleRate"][0];
 
-        AudioProcessor.resample(inputs, sr, async (resampled) => {
-            queue++;
-            var results = (await seperate(Array.from(resampled))).flat(2);
-            queue--;
+        resample(inputs, sr, async (resampled) => {
 
             const size = outputs[0][0].length;
 
@@ -87,29 +81,6 @@ class AudioProcessor extends AudioWorkletProcessor{
                 }
             }
         });
-    }
-
-    static resample(inputs, sampleRate, onComplete) {
-        // const interpolate = (sampleRate % 16000 !== 0);
-        // const multiplier = sampleRate / 16000;
-
-        // const original = inputs[0];
-        // const subsamples = new Float32Array(1024);
-
-        // for (let i = 0; i < 1024; i += 1) {
-        //     if (!interpolate) {
-        //         subsamples[i] = original[i * multiplier];
-        //     } else {
-        //         const left = Math.floor(i * multiplier);
-        //         const right = left + 1;
-        //         const p = (i * multiplier) - left;
-        //         subsamples[i] = (((1 - p) * original[left]) + (p * original[right]));
-        //     }
-        // }
-
-        const subsamples = inputs[0];
-
-        onComplete(subsamples);
     }
 }
 

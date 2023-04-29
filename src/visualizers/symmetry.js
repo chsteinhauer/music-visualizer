@@ -13,10 +13,9 @@ function setupSymmetry() {
     n = 0.01;
 }
 
-
 function drawSymmetry() {
     background(255,20)
-    
+
     drawFigure(width/2 + 20, height/2 + 20);
 }
 

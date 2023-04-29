@@ -45,15 +45,15 @@ window.draw = () => {
     }
 }
 
-// Create a WebWorker for Audio Processing.
-const worker = new Worker('./components/worker.js', { type: 'module'});
+// // Create a WebWorker for Audio Processing.
+// const worker = new Worker('./components/worker.js', { type: 'module'});
 
-// Send FreeQueue instance and atomic state to worker.
-worker.postMessage({
-    type: 'init',
-    data: {
-        inputQueue: Player.inputQueue,
-        outputQueue: Player.outputQueue,
-        atomicState: Player.atomicState,
-    }
-});
+// // Send FreeQueue instance and atomic state to worker.
+// worker.postMessage({
+//     type: 'init',
+//     data: {
+//         inputQueue: Player.inputQueue,
+//         outputQueue: Player.outputQueue,
+//         atomicState: Player.atomicState,
+//     }
+// });

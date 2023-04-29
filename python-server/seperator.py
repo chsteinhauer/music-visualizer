@@ -3,10 +3,19 @@ from torchaudio.transforms import Fade
 import torch
 import scipy
 
+from demucs import pretrained
+from demucs.apply import apply_model
+
+PATH = "python-server/samples/"
+name = "american_idiot"
+
 torch.hub.set_dir('./models/')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model = ta.models.hdemucs_low(["voices", "bass", "drums", "other"])
+# model = ta.models.hdemucs_high(["voices", "bass", "drums", "other"]) #ta.models.hdemucs_low(["voices", "bass", "drums", "other"])
+# model.eval()
+
+model = pretrained.get_model(name='mdx_extra')
 model.eval()
 
 def get_sources():
@@ -14,28 +23,41 @@ def get_sources():
 
 def run(file_path):
     mix, sr = ta.load(str(file_path))
+
+    #y, sr = librosa.load(file_path, sr=16000)
+    #mix = torch.tensor([y, y])
+
+    print(mix.size())
     print("file: ", file_path)
 
-    mono = mix.mean(0)
-    mean = mono.mean()
-    std = mono.std()
-    mix = (mix - mean) / std
+    #mix = resample(mix, sr, 8000)
 
-    mix = resample(mix, sr, 8000)
+    ref = mix.mean(0)
+    mix = (mix - ref.mean()) / ref.std()  # normalization
 
-    estimates = separate_sources(
-        model,
-        mix[None],
-        device=device,
-    )[0]
+    # sources = separate_sources(
+    #     model,
+    #     mix[None],
+    #     device=device,
+    #     segment=10,
+    #     overlap=0.1,
+    # )[0]
+    with torch.no_grad():
+        sources = apply_model(model, mix[None], overlap=0.15)[0]
+        
+    sources = sources * ref.std() + ref.mean()
 
-    estimates = estimates * std + mean
-
-    print(estimates.size())
     sources_list = model.sources
+    sources = list(sources)
+
+    audios = dict(zip(sources_list, sources))
+
     print(sources_list)
     
-    return estimates.tolist()
+    for n, l in audios.items():
+        save_wav(n,l)
+
+    return []
 
 
 def resample(X, SR, N):
@@ -50,7 +72,7 @@ def resample(X, SR, N):
 def separate_sources(
         model,
         mix,
-        sample_rate=8000,
+        sample_rate=16000,
         segment=10.,
         overlap=0.1,
         device=None,
@@ -86,3 +108,25 @@ def separate_sources(
         if end >= length:
             fade.fade_out_len = 0
     return final
+
+
+import wave
+import numpy as np
+
+
+def save_wav(name, list):
+    samplerate = 44100
+
+    # Put the channels together with shape (2, 44100).
+    audio = np.array(list).T
+
+    # Convert to (little-endian) 16 bit integers.
+    audio = (audio * (2 ** 15 - 1)).astype("<h")
+
+    with wave.open(PATH + name + ".wav", "w") as f:
+        # 2 Channels.
+        f.setnchannels(2)
+        # 2 bytes per sample.
+        f.setsampwidth(2)
+        f.setframerate(samplerate)
+        f.writeframes(audio.tobytes())

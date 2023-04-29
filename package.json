@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "setup": "pip install -r ./python-server/requirements.txt",
-    "server": "nodemon --exec python ./python-server/server.py",
+    "server": "nodemon -e py --exec python ./python-server/server.py",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

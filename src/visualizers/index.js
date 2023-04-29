@@ -1,7 +1,7 @@
-import { setupTest, drawTest } from './test.js';
+import { setupBasic, drawBasic } from './basic.js';
 
-var fsetup = [setupTest];
-var fdraw = [drawTest];
+var fsetup = [setupBasic];
+var fdraw = [drawBasic];
 
 let index = 0;
 

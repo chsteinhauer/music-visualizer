@@ -3,8 +3,6 @@
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="./styles/main.scss">
-        <!-- <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script> -->
-
     </head>
 
     <body>
@@ -12,14 +10,11 @@
             <div id="settings"></div>
             <div id='canvas' class="canvas"></div>
             <div id="player" class="player">
-                <button id="microphone">
-                    <img src="icons/microphone-off.svg" class="icon"></img>
+                <button id="toggle-play">
+                    <img src="icons/play.svg" class="icon"></img>
                 </button>
             </div>
         </div>
-
-        <!-- <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script> -->
-
 
         <script src="./utils/coi-serviceworker.js"></script>
         <script type="module" src="main.js"></script>

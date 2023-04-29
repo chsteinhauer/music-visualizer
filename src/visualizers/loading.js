@@ -46,7 +46,6 @@ function transitionLoadingScreen(callback) {
             rect(rx, 0, size2, size2);
             pop();
         }
-        translate();
         pop();
     }
 
@@ -80,8 +79,6 @@ function drawLoadingScreen() {
             rect(rx, 0, size2, size2);
             pop();
         }
-
-        translate();
         pop();
     }
 }

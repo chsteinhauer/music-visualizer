@@ -2,7 +2,6 @@ from flask import Flask, request, send_file
 from flask_cors import CORS
 import seperator
 from scipy.io import wavfile
-import _pitch
 
 app = Flask(__name__)
 CORS(app)

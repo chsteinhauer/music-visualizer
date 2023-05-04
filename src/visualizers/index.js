@@ -1,9 +1,11 @@
 import { setupTest, drawTest } from './test.js';
+import { setupTestaaa, drawTestaaa } from './lau.js';
 
-var fsetup = [setupTest];
-var fdraw = [drawTest];
+var fsetup = [setupTest, setupTestaaa];
+var fdraw = [drawTest, drawTestaaa];
 
-let index = 0;
+
+let index = 1; 
 
 function setup() {
     fsetup[index]()

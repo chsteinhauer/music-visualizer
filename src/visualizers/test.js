@@ -18,4 +18,4 @@ function drawTest() {
     polarEllipses(freq*(20/midi),size,size,freq*(20/midi));
 }
 
-export { setupTest, drawTest };
+export { setupTest, drawTest }; 

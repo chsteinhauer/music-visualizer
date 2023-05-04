@@ -1,3 +1,7 @@
+import { detectPitch } from "../utils/pitch-detector";
+
+// make smoothning
+
 const AudioType = {
     None: 0,
     Mic: 1,
@@ -12,10 +16,61 @@ const AudioState = {
     Default: 4,
 }
 
+function getByteWaveform(source) {
+    const data = source.byteBuffer;
+    //source.analyser.getFloatTimeDomainData(data);
+    source.analyser.getByteFrequencyData(data);
+
+    return data;
+}
+
+function getFloatWaveform(source) {
+    const data = source.floatBuffer;
+    //source.analyser.getFloatTimeDomainData(data);
+    source.analyser.getFloatFrequencyData(data);
+
+    return data;
+}
+
+function getByteSpectrum(source) {
+    const data = source.byteBuffer;
+    //source.analyser.getFloatFrequencyData(data);
+    source.analyser.getByteFrequencyData(data);
+
+    return data;
+}
+
+function getFloatSpectrum(source) {
+    const data = new Float32Array(source.analyser.frequencyBinCount); // source.floatBuffer;
+    //source.analyser.getFloatFrequencyData(data);
+    source.analyser.getFloatFrequencyData(data);
+
+    return data;
+}
+
+function getEnvelope(source) {
+    const data = source.envelopeBuffer;
+    source.envelope.getFloatTimeDomainData(data);
+
+    return data;
+}
+
+function getPitch(source) {
+    const data = getFloatWaveform(source);
+    return detectPitch(data);
+}
+
 export const State = {
     state: AudioState.Setup,
     type: AudioType.None,
     sources: [],
+
+    getByteWaveform,
+    getFloatWaveform,
+    getByteSpectrum,
+    getFloatSpectrum,
+    getEnvelope,
+    getPitch,
 
     isStreaming() {
         return this.state === AudioState.Play;
@@ -41,6 +96,8 @@ export const State = {
             type: null,
             // fundemental frequency
             frequency: null,
+
+            frequencyQueue: [],
             // harmonic overtones
             overtones: [],
     
@@ -78,7 +135,6 @@ export const State = {
                 this.state = AudioState.Default;
                 break;
         }
-    }
-
+    },
 }
 

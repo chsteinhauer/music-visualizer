@@ -3,11 +3,13 @@ import { State } from "../model/state";
 var countdown = 200;
 
 function setupLoading() {
-    createCanvas(windowWidth, windowHeight);
-    background(50);
+    const canvas = createCanvas(windowWidth, windowHeight);
+    canvas.parent("canvas");
+    background(255);
 
+    noFill();
     ellipseMode(CENTER);
-    stroke(200, 15);
+    stroke(0, 20);
 }
 
 function drawLoading(loading = true, callback) {
@@ -23,7 +25,12 @@ function windowResized() {
 }
 
 function transitionLoadingScreen(callback) {
-    const mul = 7 * (1 / countdown--);
+    //stroke(0, 20);
+
+    const p = (1 / countdown--);
+    const mul = 7 * p;
+    //fill(255, 100 * p);
+
     var ang1 = TWO_PI * noise(0.01 * frameCount + 10);
     var ang2 = TWO_PI * noise(0.01 * frameCount + 20);
     var ang3 = TWO_PI * noise(0.01 * frameCount + 30);

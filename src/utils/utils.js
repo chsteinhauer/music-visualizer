@@ -1,27 +1,17 @@
-import * as tf from "@tensorflow/tfjs";
-import { State } from "../model/state";
 
-// const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
-// let _model;
+export function convertToRatio(dB) {
+	return Math.exp(dB / 8.6858);
+}
 
-// export async function setupModel() {
-// 	const loader = modelLoader(model_url, 'model');
-// 	_model = await loader.loadLayersModel();
-// }
-
-function resample(inputs, sampleRate, onComplete) {
-
+export function resample(buffer, sampleRate, onComplete) {
 	const interpolate = (sampleRate % 16000 !== 0);
 	const multiplier = sampleRate / 16000;
 
-	const original = inputs;
+	//const buffer = JSON.parse(JSON.stringify(input));
 
-	var index = 0;
-	for (let channel = 0; channel < inputs.length; channel += 2) {
+	for (let channel = 0; channel < buffer.numberOfChannels; ++channel) {
 
-		const samples = original[channel];
-		State.samples = samples;
-
+		const samples = buffer.getChannelData(channel);
 		const subsamples = new Float32Array(1024);
 
 		for (let i = 0; i < 1024; i += 1) {
@@ -35,10 +25,9 @@ function resample(inputs, sampleRate, onComplete) {
 			}
 		}
 
-		onComplete(subsamples, index++);
+		onComplete(subsamples);
 	}
 }
-
 
 
 export function callCallback(promise, callback) {
@@ -56,57 +45,3 @@ export function callCallback(promise, callback) {
     });
 }
 
-
-export function isAbsoluteURL(str) {
-	const pattern = new RegExp('^(?:[a-z]+:)?//', 'i');
-	return pattern.test(str);
-}
-
-
-export function getModelPath(absoluteOrRelativeUrl) {
-	if (!isAbsoluteURL(absoluteOrRelativeUrl) && typeof window !== 'undefined') {
-		return window.location.pathname + absoluteOrRelativeUrl;
-	}
-	return absoluteOrRelativeUrl;
-}
-
-
-class ModelLoader {
-
-	constructor(path, expected = 'model', prepend = true) {
-		const url = prepend ? getModelPath(path) : path;
-		const known = {};
-		if (url.endsWith('.json')) {
-			const pos = url.lastIndexOf('/') + 1;
-			this.directory = url.slice(0, pos);
-			const fileName = url.slice(pos, -5);
-			if (fileName !== expected && isKnownName(fileName)) {
-				console.warn(`Expected a ${expected}.json file URL, but received a ${fileName}.json file instead.`);
-			} else {
-				known[expected] = url;
-			}
-		} else {
-			this.directory = url.endsWith('/') ? url : `${url}/`;
-		}
-		this.modelUrl = known.model || this.getPath('model.json');
-	}
-
-
-	getPath(filename) {
-		return isAbsoluteURL(filename) ? filename : this.directory + filename;
-	}
-
-	async loadLayersModel(relativePath) {
-		const url = relativePath ? this.getPath(relativePath) : this.modelUrl;
-		try {
-				return await tf.loadLayersModel(url);
-		} catch (error) {
-				throw new Error(`Error loading model from URL ${url}: ${String(error)}`);
-		}
-	}
-}
-
-
-export function modelLoader(path, expected, prepend) {
-    return new ModelLoader(path, expected, prepend);
-}

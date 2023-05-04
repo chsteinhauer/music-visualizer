@@ -28,24 +28,37 @@ export async function getSourceData(ctx) {
     return Promise.all(data)
 }
 
-export async function getData() {
-    const res = await fetch("http://localhost:3000/chunk", {
+export async function getOriginalData(ctx) {
+    const promise = fetch("http://localhost:3000/file/original", {
         method: "GET",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "audio/wav"
         },
-    })
-    return res.json();
+    }).then((res) => res.arrayBuffer())
+    .then((buf) => ctx.decodeAudioData(buf));
+    
+    return promise;
 }
 
-export async function seperate(data) {
-    const res = await fetch("http://localhost:3000/seperate", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    return res.json();
-}
+
+// export async function getData() {
+//     const res = await fetch("http://localhost:3000/chunk", {
+//         method: "GET",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//     })
+//     return res.json();
+// }
+
+// export async function seperate(data) {
+//     const res = await fetch("http://localhost:3000/seperate", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify(data)
+//     })
+//     return res.json();
+// }
 

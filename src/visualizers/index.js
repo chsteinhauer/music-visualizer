@@ -1,11 +1,12 @@
 import { setupBasic, drawBasic } from './basic.js';
-import { drawSymmetry, setupSymmetry } from './symmetry.js';
 import { drawExp, setupExp } from './experiment.js';
+import { setupTestaaa, drawTestaaa } from './lau.js';
 
-var fsetup = [setupBasic, setupExp];
-var fdraw = [drawBasic, drawExp];
 
-let index = 0;
+var fsetup = [setupBasic, setupTestaaa];
+var fdraw = [drawBasic, drawTestaaa];
+
+let index = 1; 
 
 function setup() {
     fsetup[index]()

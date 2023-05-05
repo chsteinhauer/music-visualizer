@@ -103,7 +103,7 @@ export const Player = {
             analyser.fftSize = 1024;
             analyser.minDecibels = -50;
             analyser.maxDecibels = -10;
-            analyser.smoothingTimeConstant = 0.1;
+            analyser.smoothingTimeConstant = 0.75;
 
             // init state properties
             State.sources[i].analyser = analyser;

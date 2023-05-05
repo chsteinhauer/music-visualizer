@@ -1,6 +1,6 @@
-import { detectPitch } from "../utils/pitch-detector";
-
 // make smoothning
+
+
 
 const AudioType = {
     None: 0,
@@ -18,7 +18,6 @@ const AudioState = {
 
 function getByteWaveform(source) {
     const data = source.byteBuffer;
-    //source.analyser.getFloatTimeDomainData(data);
     source.analyser.getByteFrequencyData(data);
 
     return data;
@@ -26,38 +25,35 @@ function getByteWaveform(source) {
 
 function getFloatWaveform(source) {
     const data = source.floatBuffer;
-    //source.analyser.getFloatTimeDomainData(data);
-    source.analyser.getFloatFrequencyData(data);
+    source.analyser.getFloatTimeDomainData(data);
 
     return data;
 }
 
 function getByteSpectrum(source) {
     const data = source.byteBuffer;
-    //source.analyser.getFloatFrequencyData(data);
     source.analyser.getByteFrequencyData(data);
 
     return data;
 }
 
 function getFloatSpectrum(source) {
-    const data = new Float32Array(source.analyser.frequencyBinCount); // source.floatBuffer;
-    //source.analyser.getFloatFrequencyData(data);
+    const data = source.floatBuffer;
     source.analyser.getFloatFrequencyData(data);
 
     return data;
 }
 
-function getEnvelope(source) {
-    const data = source.envelopeBuffer;
-    source.envelope.getFloatTimeDomainData(data);
-
-    return data;
-}
-
-function getPitch(source) {
+function getLevel(source) {
     const data = getFloatWaveform(source);
-    return detectPitch(data);
+
+    let sum = 0.0;
+    for (const amplitude of data) { 
+        const level = amplitude*amplitude;
+        sum += level < 0.001 ? 0 : level; 
+    }
+
+    return Math.sqrt(sum / data.length);
 }
 
 export const State = {
@@ -69,8 +65,7 @@ export const State = {
     getFloatWaveform,
     getByteSpectrum,
     getFloatSpectrum,
-    getEnvelope,
-    getPitch,
+    getLevel,
 
     isStreaming() {
         return this.state === AudioState.Play;

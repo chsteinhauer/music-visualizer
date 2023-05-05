@@ -5,11 +5,10 @@ import { State } from "./model/state";
 import { setup, draw, windowResized } from "./visualizers";
 import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
-import { setupModel } from "./utils/pitch-detector.js";
 import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
 
-let _hoverPlaybar = false;
 let _loading = true;
+let _hoverPlaybar = false;
 let _fs = false;
 
 function reset() {
@@ -21,41 +20,19 @@ window.windowResized = () => {
 }
 
 window.setup = async () => {
-    // Setup play button, have "start" and "stop" functionality
-    const toggle = document.querySelector('#toggle-play');
-    toggle.addEventListener('click', async () => { 
-        setup();
-        await Player.toggleButtonClickHandler(toggle);
-    });
-
-    const bar = document.querySelector('#playbar');
-    bar.addEventListener("mouseleave", (e) => {
-        _hoverPlaybar = false;
-    });
-    bar.addEventListener("mouseover", function (event) {
-        clearTimeouts();
-        _hoverPlaybar = true;
-    });
-
-    const fscreen = document.querySelector('#fullscreen');
-    fscreen.addEventListener('click', () => fullscreen(!_fs));
-
     try {
         State.setState("loading");
-        setupLoading();
-        await setupModel();
 
         var srcs = ["vocals", "bass", "drums", "other"]; //await sources();
-
         for (var s of srcs) {
             State.add({ title: s });
         }
 
-        Player.init(() => {
-            _loading = false;
-            
-        });
+        setupLoading();
+        setupWorker();
+        setupUIComponents();
 
+        _loading = false;
     } catch (err) {
         console.error(err);
     }
@@ -75,6 +52,46 @@ window.draw = () => {
     }
 }
 
+
+function setupWorker() {
+    // Create a WebWorker for Audio Processing.
+    const worker = new Worker('./components/worker.js', { type: 'module'});
+
+    worker.onmessage = (msg) => {
+        const freqs = msg.data;
+        State.sources.forEach((s,i) => s.frequency = freqs[i]);//s.frequencyQueue.push(freqs[i]));
+    };
+
+    // Send FreeQueue instance and atomic state to worker.
+    worker.postMessage({
+        type: 'init',
+        data: Player.data
+    });
+}
+
+function setupUIComponents() {
+    // Playerbar
+    const bar = document.querySelector('#playbar');
+    bar.addEventListener("mouseleave", (e) => {
+        _hoverPlaybar = false;
+    });
+    bar.addEventListener("mouseover", function (event) {
+        clearTimeouts();
+        _hoverPlaybar = true;
+    });
+
+    // Setup play button, have "start" and "stop" functionality
+    const toggle = document.querySelector('#toggle-play');
+    toggle.addEventListener('click', async () => { 
+        setup();
+        await Player.toggleButtonClickHandler(toggle);
+    });
+
+    // Fullscreen
+    const fscreen = document.querySelector('#fullscreen');
+    fscreen.addEventListener('click', () => fullscreen(!_fs));
+}
+
 onmousemove = (e) => {
     const bar = document.querySelector('#playbar');
 
@@ -90,17 +107,3 @@ onmousemove = (e) => {
         bar.classList.add("hide");
     }, 2000)
 };
-
-// Create a WebWorker for Audio Processing.
-const worker = new Worker('./components/worker.js', { type: 'module'});
-
-worker.onmessage = (msg) => {
-    const freqs = msg.data;
-    State.sources.forEach((s,i) => s.frequency = freqs[i]);//s.frequencyQueue.push(freqs[i]));
-};
-
-// Send FreeQueue instance and atomic state to worker.
-worker.postMessage({
-    type: 'init',
-    data: Player.data
-});

@@ -7,7 +7,6 @@ import { getOriginalData, getSourceData } from "../utils/api";
 import { config } from "../model/config";
 
 const nodes = {
-    // AudioContext of primary audio stream
     context: null, 
     source: null,
     worklet: null,
@@ -67,7 +66,6 @@ export const Player = {
     async setupContext() {
         const ctx = getAudioContext();
         const src = ctx.createBufferSource();
-        const merge = ctx.createChannelMerger(4);
         const gain = ctx.createGain();
         
         await this.prepareAudioData(ctx, src);
@@ -124,17 +122,11 @@ export const Player = {
 
         this.nodes.context = ctx;
         this.nodes.source = src;
-        //this.nodes.visualWorklet = v_worklet;
     },
 
     updateParameter(name, value) {
         // const par = this.nodes.visualWorklet.parameters.get(name);
         // par.value = value;
-    },
-
-    display() {
-        // const mic = document.querySelector('#microphone');
-        // mic.classList.remove("hide");
     },
 
     async toggleButtonClickHandler(button) {
@@ -164,9 +156,5 @@ export const Player = {
             select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
         }
     },
-
-    async init(callback) {     
-        callback();
-    }
 }
 

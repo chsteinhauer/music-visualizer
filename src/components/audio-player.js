@@ -166,11 +166,7 @@ export const Player = {
     },
 
     async init(callback) {     
-            // Setup play button, have "start" and "stop" functionality
-            const toggle = document.querySelector('#toggle-play');
-            toggle.addEventListener('click', async () => await this.toggleButtonClickHandler(toggle));
-
-            callback();
-        }
+        callback();
     }
+}
 

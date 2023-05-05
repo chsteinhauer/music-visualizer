@@ -7,8 +7,6 @@ export function resample(buffer, sampleRate, onComplete) {
 	const interpolate = (sampleRate % 16000 !== 0);
 	const multiplier = sampleRate / 16000;
 
-	//const buffer = JSON.parse(JSON.stringify(input));
-
 	for (let channel = 0; channel < buffer.numberOfChannels; ++channel) {
 
 		const samples = buffer.getChannelData(channel);
@@ -26,6 +24,20 @@ export function resample(buffer, sampleRate, onComplete) {
 		}
 
 		onComplete(subsamples);
+	}
+}
+
+
+let timeout = null;
+
+export function setInterruptableTimeout(callback, interval) {
+	clearTimeouts();
+	timeout = setTimeout(callback, interval);
+}
+
+export function clearTimeouts() {
+	if (timeout) {
+		clearTimeout(timeout)
 	}
 }
 

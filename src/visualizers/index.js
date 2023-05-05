@@ -16,4 +16,8 @@ function draw() {
     fdraw[index]()
 }
 
-export {setup, draw};
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight, true);
+}
+
+export {setup, draw, windowResized};

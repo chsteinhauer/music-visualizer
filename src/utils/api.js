@@ -40,6 +40,34 @@ export async function getOriginalData(ctx) {
     return promise;
 }
 
+export async function stream(file, ctx) {
+    let form = new FormData();
+    form.append("audio_file", file);
+    let streaming = false;
+
+    const response = await fetch("http://localhost:3000/seperate", {
+        method: "POST",
+        body: form,
+    });
+
+    const reader = response.body.getReader();
+    while (true) {
+        const { done, value } = await reader.read();
+        console.log(value);
+        //ctx.decodeAudioData(value.buffer).then((val) => console.log(val));
+
+        if (done) {
+            // Do something with last chunk of data then exit reader
+            return;
+        }
+        
+        // if (!streaming) {
+        //     src.start();
+        //     streaming = true;
+        // }
+    }
+}
+
 
 // export async function getData() {
 //     const res = await fetch("http://localhost:3000/chunk", {

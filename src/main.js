@@ -42,7 +42,7 @@ window.draw = () => {
     try {
         if (State.isLoading()) {
             drawLoading(_loading, () => {
-                Player.display();
+                //Player.display();
             });
         } else if (State.isStreaming()) {
             draw();
@@ -80,14 +80,18 @@ function setupUIComponents() {
         _hoverPlaybar = true;
     });
 
-    // Setup play button, have "start" and "stop" functionality
+    // File explorer button
+    const imp = document.querySelector('#import');
+    imp.addEventListener('click', () => importFile());
+
+    // Play/pause button
     const toggle = document.querySelector('#toggle-play');
     toggle.addEventListener('click', async () => { 
         setup();
         await Player.toggleButtonClickHandler(toggle);
     });
 
-    // Fullscreen
+    // Fullscreen button
     const fscreen = document.querySelector('#fullscreen');
     fscreen.addEventListener('click', () => fullscreen(!_fs));
 }
@@ -107,3 +111,15 @@ onmousemove = (e) => {
         bar.classList.add("hide");
     }, 2000)
 };
+
+function importFile() {
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = async _ => {
+        // you can use this method to get file and perform respective operations
+        let file = input.files[0];
+
+        await Player.setupContext(file);
+    };
+    input.click();
+}

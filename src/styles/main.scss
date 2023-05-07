@@ -49,21 +49,34 @@ html, body {
         transform: translateX(-50%);
 
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: space-between;
 
-        height: 42px;
+        height: 75px;
         width: 30%;
         max-width: 400px;
         min-width: 200px;
         
-        background-color: rgba(128, 128, 128, 0.608);
-        border-radius: 7px;
+        &-top, &-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3px;
+
+            width: 100%;
+        }
+
+        &-bottom {
+            background-color: rgba(128, 128, 128, 0.608);
+            border-radius: 7px;
+        }
     }
+
+
 
     .button {
         position: relative;
-        border-radius: 18px;
         padding: 8px;
         margin: 0;
         border: 0;
@@ -72,6 +85,15 @@ html, body {
         cursor: pointer;
 
         opacity: 0.8;
+
+        &-control {
+            border-radius: 18px;
+        }
+
+        &-import {
+            opacity: 0.6;
+            border-radius: 5px;
+        }
 
         &:hover {
             opacity: 1;

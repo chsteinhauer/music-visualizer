@@ -3,7 +3,7 @@ import channel_url from "./channel-processor.js?url";
 import visual_url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
-import { getOriginalData, getSourceData } from "../utils/api";
+import { stream } from "../utils/api";
 import { config } from "../model/config";
 
 const nodes = {
@@ -38,11 +38,14 @@ export const Player = {
 
     },
 
-    async prepareAudioData(ctx, src) {
+    async prepareAudioData(file, ctx, src) {
         // seperate track
         console.log("get data...");
-        const original = await getOriginalData(ctx);
-        const sources = await getSourceData(ctx);
+        // const original = await getOriginalData(ctx);
+        // const sources = await getSourceData(ctx);
+
+        await stream(file, ctx, src);
+        debugger
         console.log("data fetched!")
 
         const size = sources[0].length;
@@ -63,12 +66,12 @@ export const Player = {
         src.buffer = buffer;
     },
     
-    async setupContext() {
+    async setupContext(file) {
         const ctx = getAudioContext();
         const src = ctx.createBufferSource();
         const gain = ctx.createGain();
         
-        await this.prepareAudioData(ctx, src);
+        
 
         // Prepare nodes for audio processing
         await ctx.audioWorklet.addModule(channel_url);
@@ -117,8 +120,9 @@ export const Player = {
         src.connect(c_worklet);
         c_worklet.connect(gain, 4);
         gain.connect(ctx.destination);
-        src.start();
         ctx.suspend();
+
+        await this.prepareAudioData(file, ctx, src);
 
         this.nodes.context = ctx;
         this.nodes.source = src;

@@ -6,7 +6,6 @@ let interval;
 
 const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-
 function setupBasic() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");

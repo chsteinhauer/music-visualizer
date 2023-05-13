@@ -15,8 +15,10 @@ CORS(app)
 def sources():
     return seperator.sources()
 
+
 @app.route("/samplerate", methods=["POST"])
 def samplerate():
+    # i dunno how to get sample rate in javascript, so here we are
     input = request.files["audio_file"]
     mix, sr = ta.load(input)
 
@@ -26,41 +28,31 @@ def samplerate():
 @app.route("/seperate", methods=["POST"])
 def seperate():
 
-
+    # make generator for source seperation to stream the sources 
+    # back to the client, as the model is heavy and slow
     def generate():
-        
         input = request.files["audio_file"]
         mix, sr = ta.load(input)
 
         for row in seperator.separate_sources(mix,sr):
-            temp = tempfile.NamedTemporaryFile(suffix=".wav")
+            # we make a temporary file as .wav format to store
+            # the data chunk in
+            chunk = tempfile.NamedTemporaryFile(suffix=".wav")
 
             audio = np.array(row).T
-            soundfile.write(temp, audio, sr)
+            soundfile.write(chunk, audio, sr)
 
-            # skip header, as it is set on client side
-            temp.seek(44)
-            yield temp.read()
+            # skip header, as it is set on client side - because
+            # web audio api is rude and does not support streaming
+            chunk.seek(44)
 
-            temp.close()
+            # send chunk to client
+            yield chunk.read()
+
+            chunk.close()
 
     return app.response_class(stream_with_context(generate()), mimetype='audio/x-wav')
 
 
 if __name__ == "__main__":
     app.run(port=3000)
-
-
-
-
-# @app.route("/file/<source>", methods=["GET"])
-# def file(source):
-#     file_name = name + "_" + source + ".wav";
-#     file_path = PATH + file_name
-
-#     return send_file(
-#         file_path,
-#         mimetype = "audio/wav",
-#         as_attachment = True,
-#         download_name = file_name
-#     )

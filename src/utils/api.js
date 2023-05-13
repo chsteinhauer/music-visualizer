@@ -10,6 +10,10 @@ export async function getSourceNames() {
     return res.json();
 }
 
+/**
+ * @param {File} file 
+ * @returns sample rate
+ */
 export async function getSampleRate(file) {
     let form = new FormData();
     form.append("audio_file", file);
@@ -22,7 +26,14 @@ export async function getSampleRate(file) {
     return response.json();
 }
 
-
+/**
+ * Reads file as array buffer and sets channel data on the 
+ * two last channels in source
+ * 
+ * @param {AudioContext} ctx 
+ * @param {AudioBufferSourceNode} src 
+ * @param {File} file 
+ */
 export async function setAudioBuffer(ctx, src, file) {
     const reader = new FileReader();
 
@@ -39,7 +50,15 @@ export async function setAudioBuffer(ctx, src, file) {
     reader.readAsArrayBuffer(file);
 }
 
-
+/**
+ * Generator that post a file to server, which response with
+ * streaming chunks of seperated sources. All chunks are decoded into
+ * an AudioBuffer and yielded to the caller.
+ * 
+ * @param {File} file 
+ * @param {AudioContext} ctx 
+ * @yields AudioBuffer
+ */
 export async function* stream(file, ctx) {
     let form = new FormData();
     form.append("audio_file", file);

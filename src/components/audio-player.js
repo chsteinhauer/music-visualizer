@@ -1,6 +1,5 @@
 import { State } from "../model/state";
-import channel_url from "./channel-processor.js?url";
-import visual_url from "./visual-processor.js?url";
+import url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
 import { getSampleRate, setAudioBuffer, stream } from "../utils/api";
@@ -21,6 +20,10 @@ const data = {
     ),
 }
 
+/**
+ * Controls the state and nodes in the audio processing chain. Manages
+ * buffers and all that stuff
+ */
 export const Player = {
     nodes,
     data,
@@ -39,8 +42,17 @@ export const Player = {
 
     },
 
-    async prepareAudioData(file, ctx, src, callback) {
-        // seperate track
+    /**
+     * Fills up buffer by receiving streams of chunks from
+     * server - after first chunk is received and set, the 
+     * audio can be played
+     * 
+     * @param {File} file 
+     * @param {AudioContext} ctx 
+     * @param {AudioBufferSourceNode} src 
+     * @param {Function} callback 
+     */
+    async fillBuffer(file, ctx, src, callback) {
         console.log("begin buffering...");
         let streaming = false;
 
@@ -53,18 +65,27 @@ export const Player = {
 
             loaded += length;
 
+            // Make audio playable
             if (!streaming) {
                 src.start();
                 ctx.suspend();
-                console.log("ready!");
+
                 streaming = true;
                 callback();
+
+                console.log("ready!");
             }
         }
 
         console.log("buffering done!")
     },
     
+    /**
+     * Setup audio processing chain from source to destination
+     * 
+     * @param {File} file 
+     * @param {Function} callback 
+     */
     async setupContext(file, callback) {
         const sampleRate = await getSampleRate(file);
         const ctx = new AudioContext({ sampleRate });
@@ -75,16 +96,7 @@ export const Player = {
         const splitter = ctx.createChannelSplitter(10);
         const main = ctx.createChannelMerger(2);
         
-
-        // Prepare nodes for audio processing
-        // await ctx.audioWorklet.addModule(channel_url);
-        await ctx.audioWorklet.addModule(visual_url);
-        
-        // const c_worklet = new AudioWorkletNode(ctx, 'channel-processor', {
-        //     outputChannelCount: [1, 1, 1, 1, 2],
-        //     numberOfInputs: 1,
-        //     numberOfOutputs: 5,
-        // });
+        await ctx.audioWorklet.addModule(url);
         const worklet = new AudioWorkletNode(ctx, 'visual-processor', {
             outputChannelCount: [1, 1, 1, 1],
             numberOfInputs: 4,
@@ -92,10 +104,9 @@ export const Player = {
             processorOptions: data,
         });
 
-        // c_worklet.disconnect();
         worklet.disconnect();
 
-        // Connect analyser to each orig source channel
+        // Connect analyser to each source channel
         for (const [i, s] of config.sources.entries()) {
             // setup low pass
             const filter = ctx.createBiquadFilter();
@@ -109,7 +120,7 @@ export const Player = {
             analyser.maxDecibels = -10;
             analyser.smoothingTimeConstant = 0.75;
 
-            const merge = ctx.createChannelMerger(1);
+            const source = ctx.createChannelMerger(1);
 
             // init state properties
             State.sources[i].analyser = analyser;
@@ -117,24 +128,18 @@ export const Player = {
             State.sources[i].floatBuffer = new Float32Array(analyser.frequencyBinCount);
 
             const channel = i * 2;
-            splitter.connect(merge, channel, 0);
-            splitter.connect(merge, channel+1, 0);
+            splitter.connect(source, channel, 0);
+            splitter.connect(source, channel+1, 0);
 
-            merge.connect(filter);
+            source.connect(filter);
             filter.connect(worklet, 0, i)
             worklet.connect(analyser, i, 0);
         }
 
-        //     // make connections
-        //     c_worklet.connect(filter, i, 0);
-        //     filter.connect(v_worklet, 0, i);
-        //     v_worklet.connect(analyser, i, 0);
-        // }
         src.connect(splitter);
         splitter.connect(main, 8, 0);
         splitter.connect(main, 9, 1);
        
-        //c_worklet.connect(gain, 4);
         main.connect(gain);
         gain.connect(ctx.destination);
 
@@ -142,34 +147,15 @@ export const Player = {
 
         this.nodes.context = ctx;
         this.nodes.source = src;
+        this.nodes.worklet = worklet;
 
-        await this.prepareAudioData(file, ctx, src, callback);
+        await this.fillBuffer(file, ctx, src, callback);
     },
 
-    updateParameter(name, value) {
-        // const par = this.nodes.visualWorklet.parameters.get(name);
-        // par.value = value;
-    },
-
+    /**
+     * Handler for clicking the play/pause button
+     */
     async toggleButtonClickHandler() {
-        // try {
-        //     // If AudioContext doesn't exist, try creating one. 
-        //     if (!this.nodes.context) {
-        //         button.disabled = true;
-        //         await this.setupContext();
-        //     }
-
-        //     if (!this.nodes.audioContext) {
-        //         this.nodes.audioContext = getAudioContext();
-        //     }
-
-        //     button.disabled = false;
-        // } catch(error) {
-        //     button.disabled = false;
-        //     console.error(error);
-        //     return;
-        // }
-
         if (!State.isStreaming()) {
             this.start();
             select('#toggle-play').html('<img src="icons/pause.svg" class="icon"></img>');

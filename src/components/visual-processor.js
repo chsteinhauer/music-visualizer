@@ -12,15 +12,6 @@ class VisualProcessor extends AudioWorkletProcessor{
         Object.setPrototypeOf(this.outputQueue, FreeQueue.prototype);
     }
 
-    static get parameterDescriptors() {
-        return [
-            {
-                name: "state",
-                defaultValue: 0,
-            },
-        ];
-    }
-
     process(inputs, outputs, params) {
         const input = inputs.flat();
         const output = outputs.flat();

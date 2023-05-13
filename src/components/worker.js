@@ -18,7 +18,7 @@ self.onmessage = async (msg) => {
         let { inputQueue, outputQueue, atomicState } = msg.data.data;
 
         const detectPitch = Pitchfinder.ACF2PLUS({
-            sampleRate: 48000,
+            sampleRate: 48000, //TODO: send samplerate here
         });
 
         Object.setPrototypeOf(inputQueue, FreeQueue.prototype);

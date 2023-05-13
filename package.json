@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "setup": "pip install -r ./python-server/requirements.txt",
-    "server": "nodemon --exec python ./python-server/server.py",
+    "server": "nodemon -e py --exec python ./python-server/server.py",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -26,7 +26,11 @@
     "vite": "^4.2.1"
   },
   "dependencies": {
+    "@sapphi-red/web-noise-suppressor": "^0.3.3",
+    "@tensorflow/tfjs": "4.4.0",
+    "onnxruntime-web": "^1.14.0",
     "p5js-wrapper": "^1.2.3",
+    "pitchfinder": "^2.3.2",
     "polar": "file:../assets/libraries/polar/polar.min.js",
     "sass": "^1.62.0"
   }

@@ -1,57 +1,141 @@
-import { PitchDetector } from "./utils/PitchDetector";
 import "p5js-wrapper";
 import 'p5js-wrapper/sound';
 import "../assets/libraries/polar/polar.min.js";
-import { state } from "./model/state";
-import { setup,draw } from "./visualizers";
-import { AudioPlayer } from "./components/AudioPlayer";
+import { State } from "./model/state";
+import { _setup, _draw, _windowResized } from "./visualizers";
+import { Player } from "./components/audio-player.js";
+import { setupLoading, drawLoading } from "./visualizers/loading.js";
+import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
 
-const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
-let pitch;
-let player;
+let _loading = true;
+let _hoverPlaybar = false;
+let _fs = false;
+let _file;
 
-function update () {
-    state.pitch = pitch.getPitch();
+
+window.windowResized = () => {
+    _windowResized();
 }
 
-window.setup = () => {
+window.setup = async () => {
     try {
-        pitch = new PitchDetector();
-        player = new AudioPlayer();
-        player.setup((context, mic) => pitch.startPitch(model_url, context, mic.stream));
+        State.setState("loading");
 
-        setup();
+        var srcs = ["drums", "bass", "other", "vocals"];
+        for (var s of srcs) {
+            State.add({ title: s });
+        }
 
-        // example interaction with server
-        exampleFetch();
+        setupLoading();
+        setupWorker();
+        setupUIComponents();
 
+        _loading = false;
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
 window.draw = () => {
     try {
-        update();
-        draw();
+        if (State.isLoading()) {
+            drawLoading(_loading, () => {
+                const bar = document.querySelector('#playbar');
+
+                bar.classList.remove("playbar-init");
+                bar.classList.add("show");
+            });
+        } else if (State.isStreaming()) {
+            _draw();
+        }
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
-async function exampleFetch() {
-    const res = await fetch("http://localhost:3000/analyze", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            hello: "world",
-            arr: [1,2,3,4]
-        })
+
+function setupWorker() {
+    // Create a WebWorker for Audio Processing.
+    const worker = new Worker('./components/worker.js', { type: 'module'});
+
+    worker.onmessage = (msg) => {
+        const freqs = msg.data;
+        State.sources.forEach((s,i) => s.frequency = freqs[i]);//s.frequencyQueue.push(freqs[i]));
+    };
+
+    // Send FreeQueue instance and atomic state to worker.
+    worker.postMessage({
+        type: 'init',
+        data: Player.data
+    });
+}
+
+function setupUIComponents() {
+    // Playerbar
+    const bar = document.querySelector('#playbar');
+    bar.addEventListener("mouseleave", (e) => {
+        _hoverPlaybar = false;
+    });
+    bar.addEventListener("mouseover", () => {
+        clearTimeouts();
+        _hoverPlaybar = true;
     });
 
-    const text = await res.json();
+    // File explorer button
+    const imp = document.querySelector('#import');
+    imp.addEventListener('click', () => importFile());
 
-    console.log(text);
+    // Play/pause button
+    const toggle = document.querySelector('#toggle-play');
+    toggle.addEventListener('click', async () => { 
+        await Player.toggleButtonClickHandler();
+    });
+    toggle.disabled = true
+    toggle.classList.add("disabled");
+
+    // Fullscreen button
+    const fscreen = document.querySelector('#fullscreen');
+    fscreen.addEventListener('click', () => fullscreen(!_fs));
+}
+
+onmousemove = (e) => {
+    if (!_file) return;
+
+    const bar = document.querySelector('#playbar');
+
+    if (bar.classList.contains("hide")) {
+        bar.classList.remove("hide");
+    }
+    bar.classList.add("show");
+
+    if (_hoverPlaybar) {
+        clearTimeouts();
+        return;
+    };
+
+    setInterruptableTimeout(() => { 
+        bar.classList.remove("show");
+        bar.classList.add("hide");
+    }, 2000)
+};
+
+function importFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = async _ => {
+        // you can use this method to get file and perform respective operations
+        const file = input.files[0];
+
+        const toggle = document.querySelector('#toggle-play');
+
+        await Player.setupContext(file, () => {
+            toggle.disabled = false;
+            toggle.classList.remove("disabled");
+            _hoverPlaybar = false;
+            _file = file;
+
+            _setup();
+        });
+    };
+    input.click();
 }

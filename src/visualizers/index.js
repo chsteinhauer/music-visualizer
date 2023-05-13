@@ -1,18 +1,23 @@
-import { setupTest, drawTest } from './test.js';
+import { setupBasic, drawBasic } from './basic.js';
+import { drawExp, setupExp } from './experiment.js';
 import { setupTestaaa, drawTestaaa } from './lau.js';
 
-var fsetup = [setupTest, setupTestaaa];
-var fdraw = [drawTest, drawTestaaa];
 
+var fsetup = [setupBasic, setupTestaaa];
+var fdraw = [drawBasic, drawTestaaa];
 
-let index = 1; 
+let index = 0; 
 
-function setup() {
+function _setup() {
     fsetup[index]()
 }
 
-function draw() {
+function _draw() {
     fdraw[index]()
 }
 
-export {setup, draw};
+function _windowResized() {
+    resizeCanvas(windowWidth, windowHeight, true);
+}
+
+export {_setup, _draw, _windowResized};

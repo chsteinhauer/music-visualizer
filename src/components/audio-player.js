@@ -3,8 +3,9 @@ import channel_url from "./channel-processor.js?url";
 import visual_url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
-import { stream } from "../utils/api";
+import { getSampleRate, setAudioBuffer, stream } from "../utils/api";
 import { config } from "../model/config";
+import { append } from "../utils/utils";
 
 const nodes = {
     context: null, 
@@ -38,59 +39,61 @@ export const Player = {
 
     },
 
-    async prepareAudioData(file, ctx, src) {
+    async prepareAudioData(file, ctx, src, callback) {
         // seperate track
-        console.log("get data...");
-        // const original = await getOriginalData(ctx);
-        // const sources = await getSourceData(ctx);
+        console.log("begin buffering...");
+        let streaming = false;
 
-        await stream(file, ctx, src);
-        debugger
-        console.log("data fetched!")
+        const buffering = (load) => (load / file.size) * 100;
 
-        const size = sources[0].length;
-        const sampleRate = sources[0].sampleRate;
-        const N = sources.length;
-        const length = size * N;
-        const buffer = ctx.createBuffer(N+2, length, sampleRate);
+        let loaded = 0;
+        for await (const chunk of stream(file, ctx)) {
+            const length = chunk.length;
+            append(chunk, src.buffer, loaded);
 
-        // populate buffer with data
-        for (let i = 0; i < N; ++i) {
-            const data = buffer.getChannelData(i);
-            data.set(sources[i].getChannelData(0))
+            loaded += length;
+
+            if (!streaming) {
+                src.start();
+                ctx.suspend();
+                console.log("ready!");
+                streaming = true;
+                callback();
+            }
         }
 
-        buffer.getChannelData(N).set(original.getChannelData(0));
-        buffer.getChannelData(N+1).set(original.getChannelData(1));
-
-        src.buffer = buffer;
+        console.log("buffering done!")
     },
     
-    async setupContext(file) {
-        const ctx = getAudioContext();
+    async setupContext(file, callback) {
+        const sampleRate = await getSampleRate(file);
+        const ctx = new AudioContext({ sampleRate });
         const src = ctx.createBufferSource();
+        await setAudioBuffer(ctx, src, file);
+
         const gain = ctx.createGain();
-        
+        const splitter = ctx.createChannelSplitter(10);
+        const main = ctx.createChannelMerger(2);
         
 
         // Prepare nodes for audio processing
-        await ctx.audioWorklet.addModule(channel_url);
+        // await ctx.audioWorklet.addModule(channel_url);
         await ctx.audioWorklet.addModule(visual_url);
         
-        const c_worklet = new AudioWorkletNode(ctx, 'channel-processor', {
-            outputChannelCount: [1, 1, 1, 1, 2],
-            numberOfInputs: 1,
-            numberOfOutputs: 5,
-        });
-        const v_worklet = new AudioWorkletNode(ctx, 'visual-processor', {
+        // const c_worklet = new AudioWorkletNode(ctx, 'channel-processor', {
+        //     outputChannelCount: [1, 1, 1, 1, 2],
+        //     numberOfInputs: 1,
+        //     numberOfOutputs: 5,
+        // });
+        const worklet = new AudioWorkletNode(ctx, 'visual-processor', {
             outputChannelCount: [1, 1, 1, 1],
             numberOfInputs: 4,
             numberOfOutputs: 4,
             processorOptions: data,
         });
 
-        c_worklet.disconnect();
-        v_worklet.disconnect();
+        // c_worklet.disconnect();
+        worklet.disconnect();
 
         // Connect analyser to each orig source channel
         for (const [i, s] of config.sources.entries()) {
@@ -106,26 +109,41 @@ export const Player = {
             analyser.maxDecibels = -10;
             analyser.smoothingTimeConstant = 0.75;
 
+            const merge = ctx.createChannelMerger(1);
+
             // init state properties
             State.sources[i].analyser = analyser;
             State.sources[i].byteBuffer = new Uint8Array(analyser.frequencyBinCount);
             State.sources[i].floatBuffer = new Float32Array(analyser.frequencyBinCount);
 
-            // make connections
-            c_worklet.connect(filter, i, 0);
-            filter.connect(v_worklet, 0, i);
-            v_worklet.connect(analyser, i, 0);
+            const channel = i * 2;
+            splitter.connect(merge, channel, 0);
+            splitter.connect(merge, channel+1, 0);
+
+            merge.connect(filter);
+            filter.connect(worklet, 0, i)
+            worklet.connect(analyser, i, 0);
         }
 
-        src.connect(c_worklet);
-        c_worklet.connect(gain, 4);
+        //     // make connections
+        //     c_worklet.connect(filter, i, 0);
+        //     filter.connect(v_worklet, 0, i);
+        //     v_worklet.connect(analyser, i, 0);
+        // }
+        src.connect(splitter);
+        splitter.connect(main, 8, 0);
+        splitter.connect(main, 9, 1);
+       
+        //c_worklet.connect(gain, 4);
+        main.connect(gain);
         gain.connect(ctx.destination);
-        ctx.suspend();
 
-        await this.prepareAudioData(file, ctx, src);
+        ctx.suspend();
 
         this.nodes.context = ctx;
         this.nodes.source = src;
+
+        await this.prepareAudioData(file, ctx, src, callback);
     },
 
     updateParameter(name, value) {
@@ -133,24 +151,24 @@ export const Player = {
         // par.value = value;
     },
 
-    async toggleButtonClickHandler(button) {
-        try {
-            // If AudioContext doesn't exist, try creating one. 
-            if (!this.nodes.context) {
-                button.disabled = true;
-                await this.setupContext();
-            }
+    async toggleButtonClickHandler() {
+        // try {
+        //     // If AudioContext doesn't exist, try creating one. 
+        //     if (!this.nodes.context) {
+        //         button.disabled = true;
+        //         await this.setupContext();
+        //     }
 
-            if (!this.nodes.audioContext) {
-                this.nodes.audioContext = getAudioContext();
-            }
+        //     if (!this.nodes.audioContext) {
+        //         this.nodes.audioContext = getAudioContext();
+        //     }
 
-            button.disabled = false;
-        } catch(error) {
-            button.disabled = false;
-            console.error(error);
-            return;
-        }
+        //     button.disabled = false;
+        // } catch(error) {
+        //     button.disabled = false;
+        //     console.error(error);
+        //     return;
+        // }
 
         if (!State.isStreaming()) {
             this.start();

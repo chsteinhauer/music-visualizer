@@ -18,7 +18,7 @@ self.onmessage = async (msg) => {
         let { inputQueue, outputQueue, atomicState } = msg.data.data;
 
         const detectPitch = Pitchfinder.ACF2PLUS({
-            sampleRate:48000,
+            sampleRate: 48000,
         });
 
         Object.setPrototypeOf(inputQueue, FreeQueue.prototype);
@@ -39,10 +39,9 @@ self.onmessage = async (msg) => {
                     frequencies.push(detectPitch(input[i]));
                 }
                 self.postMessage(frequencies);
-
                 outputQueue.push(input, FRAME_SIZE);
             }
-
+            
             Atomics.store(atomicState, 0, 0);
         }
     }

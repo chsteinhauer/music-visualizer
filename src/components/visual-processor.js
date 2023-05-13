@@ -27,6 +27,8 @@ class VisualProcessor extends AudioWorkletProcessor{
 
         this.inputQueue.push(input, RENDER_QUANTUM);
         this.outputQueue.pull(output, RENDER_QUANTUM);
+
+        //console.log(input, output);
         
         // Wake up worker to process a frame of data.
         if (this.inputQueue.isFrameAvailable(FRAME_SIZE)) {

@@ -5,7 +5,7 @@ export const config = {
             title: "voices",
             minPitch: 20,
             maxPitch: 5000,
-            cutoff: 1000,
+            cutoff: 2000,
         },
         {
             title: "bass",
@@ -23,7 +23,7 @@ export const config = {
             title: "other",
             minPitch: 100,
             maxPitch: 10000,
-            cutoff: 5000,
+            cutoff: 10000,
         }
     ],
 };

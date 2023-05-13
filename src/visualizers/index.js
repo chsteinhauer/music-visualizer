@@ -6,18 +6,18 @@ import { setupTestaaa, drawTestaaa } from './lau.js';
 var fsetup = [setupBasic, setupTestaaa];
 var fdraw = [drawBasic, drawTestaaa];
 
-let index = 1; 
+let index = 0; 
 
-function setup() {
+function _setup() {
     fsetup[index]()
 }
 
-function draw() {
+function _draw() {
     fdraw[index]()
 }
 
-function windowResized() {
+function _windowResized() {
     resizeCanvas(windowWidth, windowHeight, true);
 }
 
-export {setup, draw, windowResized};
+export {_setup, _draw, _windowResized};

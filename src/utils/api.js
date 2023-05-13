@@ -1,4 +1,4 @@
-import { State } from "../model/state";
+import { wavify } from "./utils";
 
 export async function getSourceNames() {
     const res = await fetch("http://localhost:3000/sources", {
@@ -10,40 +10,41 @@ export async function getSourceNames() {
     return res.json();
 }
 
-export async function getSourceData(ctx) {
-    let data = []
-
-    for (var s of State.sources) {
-        const promise = fetch("http://localhost:3000/file/" + s.title, {
-            method: "GET",
-            headers: {
-                "Content-Type": "audio/wav"
-            },
-        }).then((res) => res.arrayBuffer())
-        .then((buf) => ctx.decodeAudioData(buf));
-
-        data.push(promise)
-    }
-    
-    return Promise.all(data)
-}
-
-export async function getOriginalData(ctx) {
-    const promise = fetch("http://localhost:3000/file/original", {
-        method: "GET",
-        headers: {
-            "Content-Type": "audio/wav"
-        },
-    }).then((res) => res.arrayBuffer())
-    .then((buf) => ctx.decodeAudioData(buf));
-    
-    return promise;
-}
-
-export async function stream(file, ctx) {
+export async function getSampleRate(file) {
     let form = new FormData();
     form.append("audio_file", file);
-    let streaming = false;
+
+    const response = await fetch("http://localhost:3000/samplerate", {
+        method: "POST",
+        body: form,
+    });
+
+    return response.json();
+}
+
+
+export async function setAudioBuffer(ctx, src, file) {
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+        const original = await ctx.decodeAudioData(e.target.result);
+        const buffer = ctx.createBuffer(10, file.size, ctx.sampleRate);
+
+        buffer.getChannelData(8).set(original.getChannelData(0));
+        buffer.getChannelData(9).set(original.getChannelData(1));
+
+        src.buffer = buffer;
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+
+export async function* stream(file, ctx) {
+    let form = new FormData();
+    form.append("audio_file", file);
+
+    console.log(file);
 
     const response = await fetch("http://localhost:3000/seperate", {
         method: "POST",
@@ -51,42 +52,15 @@ export async function stream(file, ctx) {
     });
 
     const reader = response.body.getReader();
+
     while (true) {
         const { done, value } = await reader.read();
-        console.log(value);
-        //ctx.decodeAudioData(value.buffer).then((val) => console.log(val));
 
-        if (done) {
-            // Do something with last chunk of data then exit reader
-            return;
-        }
-        
-        // if (!streaming) {
-        //     src.start();
-        //     streaming = true;
-        // }
+        if (done) return;
+
+        const input = wavify(value.buffer, 8, ctx.sampleRate);
+        yield ctx.decodeAudioData(input);
     }
 }
 
-
-// export async function getData() {
-//     const res = await fetch("http://localhost:3000/chunk", {
-//         method: "GET",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//     })
-//     return res.json();
-// }
-
-// export async function seperate(data) {
-//     const res = await fetch("http://localhost:3000/seperate", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify(data)
-//     })
-//     return res.json();
-// }
 

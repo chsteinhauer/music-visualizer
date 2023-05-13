@@ -23,6 +23,8 @@ html, body {
     }
 }
 
+
+
 .wrapper {
     position: relative;
     width: 100%;
@@ -57,6 +59,10 @@ html, body {
         width: 30%;
         max-width: 400px;
         min-width: 200px;
+
+        &-init {
+            display: none;
+        }
         
         &-top, &-bottom {
             display: flex;
@@ -114,6 +120,14 @@ html, body {
         }
     }
 }
+
+.disabled {
+    cursor: none;
+    pointer-events: none;
+}
+
+
+
 
 
 .hide {

@@ -2,7 +2,7 @@ import "p5js-wrapper";
 import 'p5js-wrapper/sound';
 import "../assets/libraries/polar/polar.min.js";
 import { State } from "./model/state";
-import { setup, draw, windowResized } from "./visualizers";
+import { _setup, _draw, _windowResized } from "./visualizers";
 import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
 import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
@@ -10,20 +10,18 @@ import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
 let _loading = true;
 let _hoverPlaybar = false;
 let _fs = false;
+let _file;
 
-function reset() {
-    setup();
-}
 
 window.windowResized = () => {
-    windowResized();
+    _windowResized();
 }
 
 window.setup = async () => {
     try {
         State.setState("loading");
 
-        var srcs = ["vocals", "bass", "drums", "other"]; //await sources();
+        var srcs = ["drums", "bass", "other", "vocals"];
         for (var s of srcs) {
             State.add({ title: s });
         }
@@ -42,10 +40,13 @@ window.draw = () => {
     try {
         if (State.isLoading()) {
             drawLoading(_loading, () => {
-                //Player.display();
+                const bar = document.querySelector('#playbar');
+
+                bar.classList.remove("playbar-init");
+                bar.classList.add("show");
             });
         } else if (State.isStreaming()) {
-            draw();
+            _draw();
         }
     } catch (err) {
         console.error(err);
@@ -75,7 +76,7 @@ function setupUIComponents() {
     bar.addEventListener("mouseleave", (e) => {
         _hoverPlaybar = false;
     });
-    bar.addEventListener("mouseover", function (event) {
+    bar.addEventListener("mouseover", () => {
         clearTimeouts();
         _hoverPlaybar = true;
     });
@@ -87,9 +88,10 @@ function setupUIComponents() {
     // Play/pause button
     const toggle = document.querySelector('#toggle-play');
     toggle.addEventListener('click', async () => { 
-        setup();
-        await Player.toggleButtonClickHandler(toggle);
+        await Player.toggleButtonClickHandler();
     });
+    toggle.disabled = true
+    toggle.classList.add("disabled");
 
     // Fullscreen button
     const fscreen = document.querySelector('#fullscreen');
@@ -97,14 +99,19 @@ function setupUIComponents() {
 }
 
 onmousemove = (e) => {
+    if (!_file) return;
+
     const bar = document.querySelector('#playbar');
 
     if (bar.classList.contains("hide")) {
         bar.classList.remove("hide");
-        bar.classList.add("show");
     }
+    bar.classList.add("show");
 
-    if (_hoverPlaybar) return;
+    if (_hoverPlaybar) {
+        clearTimeouts();
+        return;
+    };
 
     setInterruptableTimeout(() => { 
         bar.classList.remove("show");
@@ -113,13 +120,22 @@ onmousemove = (e) => {
 };
 
 function importFile() {
-    let input = document.createElement('input');
+    const input = document.createElement('input');
     input.type = 'file';
     input.onchange = async _ => {
         // you can use this method to get file and perform respective operations
-        let file = input.files[0];
+        const file = input.files[0];
 
-        await Player.setupContext(file);
+        const toggle = document.querySelector('#toggle-play');
+
+        await Player.setupContext(file, () => {
+            toggle.disabled = false;
+            toggle.classList.remove("disabled");
+            _hoverPlaybar = false;
+            _file = file;
+
+            _setup();
+        });
     };
     input.click();
 }

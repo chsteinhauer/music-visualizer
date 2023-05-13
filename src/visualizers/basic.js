@@ -49,13 +49,13 @@ function drawShape(data, source, config, index) {
     push()
     fill(50, 15);
 
-    //const pitch = freqToMidi(source.frequency);
-    //const p = map(source.frequency, config.minPitch, config.maxPitch, 0, 100);
-    const level = State.getLevel(source);
-    ellipse(width - 100, pos[index] - 10, 200*level);
+    const pitch = freqToMidi(source.frequency);
+    const _p = map(source.frequency, config.minPitch, config.maxPitch, 100, 5);
+    //const level = State.getLevel(source);
+    ellipse(width - 100, pos[index] - 10, _p)//200*level);
 
     fill(0, 102, 153, 51);
-    text(source.title + ": " + level, width - 100, pos[index] - 10);
+    text(source.title + ": " + pitch, width - 100, pos[index] - 10);
     pop()
 }
 

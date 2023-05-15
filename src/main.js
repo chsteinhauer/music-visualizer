@@ -116,6 +116,7 @@ async function setupUIComponents() {
             toggle.disabled = false;
             toggle.classList.remove("disabled");
             _hoverPlaybar = false;
+            _file = file;
 
             _setup();
         })

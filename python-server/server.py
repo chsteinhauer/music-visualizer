@@ -57,8 +57,8 @@ def seperate():
             # the data chunk in
             chunk = tempfile.NamedTemporaryFile(suffix=".wav")
 
-            audio = nr.reduce_noise(y=row, sr=rate)
-            audio = np.array(audio).T
+            #audio = nr.reduce_noise(y=row, sr=rate)
+            audio = np.array(row).T
             audio = (audio * (2 ** 15 - 1)).astype("<h")
             soundfile.write(chunk, audio, rate)
 

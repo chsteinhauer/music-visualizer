@@ -1,4 +1,4 @@
-import { State } from "../model/state";
+import { State } from "../components/state";
 
 var countdown = 200;
 

@@ -25,7 +25,7 @@ self.onmessage = async (msg) => {
         Object.setPrototypeOf(outputQueue, FreeQueue.prototype);
         
         // buffer for storing data pulled out from queue.
-        const input = new Array(4).fill(null).map(_ => new Float32Array(FRAME_SIZE));
+        const input = new Array(6).fill(null).map(_ => new Float32Array(FRAME_SIZE));
 
         // loop for processing data.
         while (Atomics.wait(atomicState, 0, 0) === 'ok') {
@@ -34,12 +34,15 @@ self.onmessage = async (msg) => {
             const didPull = inputQueue.pull(input, FRAME_SIZE);
             
             if (didPull) {
+                const sources = input.slice(0,4);
                 const frequencies = [];
-                for (let i = 0; i < input.length; ++i) {
-                    frequencies.push(detectPitch(input[i]));
+
+                for (let i = 0; i < sources.length; ++i) {
+                    frequencies.push(detectPitch(sources[i]));
                 }
+
                 self.postMessage(frequencies);
-                outputQueue.push(input, FRAME_SIZE);
+                //outputQueue.push(input, FRAME_SIZE);
             }
             
             Atomics.store(atomicState, 0, 0);

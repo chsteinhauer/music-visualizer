@@ -1,5 +1,5 @@
 import { config } from "../model/config.js";
-import { State } from "../model/state.js";
+import { State } from "../components/state.js";
 
 let pos;
 let interval;

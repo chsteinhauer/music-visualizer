@@ -17,13 +17,16 @@ class VisualProcessor extends AudioWorkletProcessor{
         const output = outputs.flat();
 
         this.inputQueue.push(input, RENDER_QUANTUM);
-        this.outputQueue.pull(output, RENDER_QUANTUM);
-
-        //console.log(input, output);
         
         // Wake up worker to process a frame of data.
         if (this.inputQueue.isFrameAvailable(FRAME_SIZE)) {
             Atomics.notify(this.atomicState, 0, 1);
+        }
+
+        for (let i = 0; i < output.length; i++) {
+            for (let j = 0; j < output[i].length; j++) {
+                output[i][j] = input[i][j];
+            }
         }
         
         return true;

@@ -1,8 +1,8 @@
-import { State } from "../model/state";
+import { State } from "./state";
 import url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
-import { getSampleRate, setAudioBuffer, stream } from "../utils/api";
+import { getSample, getSampleRate, setAudioBuffer, stream } from "../utils/api";
 import { config } from "../model/config";
 import { append } from "../utils/utils";
 
@@ -13,8 +13,8 @@ const nodes = {
 }
 
 const data = {
-    inputQueue: new FreeQueue(QUEUE_SIZE, 4),
-    outputQueue: new FreeQueue(QUEUE_SIZE, 4),
+    inputQueue: new FreeQueue(QUEUE_SIZE, 6),
+    outputQueue: new FreeQueue(QUEUE_SIZE, 6),
     atomicState: new Int32Array(
         new SharedArrayBuffer(1 * Int32Array.BYTES_PER_ELEMENT)
     ),
@@ -39,7 +39,13 @@ export const Player = {
     },
 
     stop() {
+        if (this.nodes.source)
+            this.nodes.source.stop();
+        if (this.nodes.context)
+            this.nodes.context.close();
 
+        State.setState("pause");
+        select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
     },
 
     /**
@@ -77,7 +83,30 @@ export const Player = {
             }
         }
 
-        console.log("buffering done!")
+        console.log("buffering done!", ctx.currentTime)
+    },
+
+
+    async setupFromFile(file, callback) {
+        const sampleRate = await getSampleRate(file);
+        const ctx = new AudioContext({ sampleRate });
+        const src = ctx.createBufferSource();
+
+        await setAudioBuffer(ctx, src, file);
+        await this.setupContext(src, ctx);
+        await this.fillBuffer(file, ctx, src, callback);
+    },
+
+    async setupFromExample(file_name, callback) {
+        const ctx = new AudioContext({ sampleRate: 44100 });
+        const src = ctx.createBufferSource();
+
+        src.buffer = await getSample(ctx, file_name);
+        await this.setupContext(src, ctx);
+
+        src.start();
+        ctx.suspend();
+        callback();
     },
     
     /**
@@ -86,21 +115,16 @@ export const Player = {
      * @param {File} file 
      * @param {Function} callback 
      */
-    async setupContext(file, callback) {
-        const sampleRate = await getSampleRate(file);
-        const ctx = new AudioContext({ sampleRate });
-        const src = ctx.createBufferSource();
-        await setAudioBuffer(ctx, src, file);
-
+    async setupContext(src, ctx) {
         const gain = ctx.createGain();
         const splitter = ctx.createChannelSplitter(10);
         const main = ctx.createChannelMerger(2);
         
         await ctx.audioWorklet.addModule(url);
         const worklet = new AudioWorkletNode(ctx, 'visual-processor', {
-            outputChannelCount: [1, 1, 1, 1],
-            numberOfInputs: 4,
-            numberOfOutputs: 4,
+            outputChannelCount: [1, 1, 1, 1, 1, 1],
+            numberOfInputs: 6,
+            numberOfOutputs: 6,
             processorOptions: data,
         });
 
@@ -115,12 +139,12 @@ export const Player = {
 
             // setup analyser
             const analyser = ctx.createAnalyser();
-            analyser.fftSize = 1024;
+            analyser.fftSize = 64;
             analyser.minDecibels = -50;
             analyser.maxDecibels = -10;
             analyser.smoothingTimeConstant = 0.75;
 
-            const source = ctx.createChannelMerger(1);
+            const merge = ctx.createChannelMerger(1);
 
             // init state properties
             State.sources[i].analyser = analyser;
@@ -128,28 +152,37 @@ export const Player = {
             State.sources[i].floatBuffer = new Float32Array(analyser.frequencyBinCount);
 
             const channel = i * 2;
-            splitter.connect(source, channel, 0);
-            splitter.connect(source, channel+1, 0);
+            splitter.connect(merge, channel, 0);
+            splitter.connect(merge, channel+1, 0);
 
-            source.connect(filter);
-            filter.connect(worklet, 0, i)
+            merge.connect(worklet, 0, i);
+            //filter.connect(worklet, 0, i)
             worklet.connect(analyser, i, 0);
         }
 
         src.connect(splitter);
-        splitter.connect(main, 8, 0);
-        splitter.connect(main, 9, 1);
-       
+        splitter.connect(worklet, 8, 4);
+        splitter.connect(worklet, 9, 5);
+        worklet.connect(main, 4, 0);
+        worklet.connect(main, 5, 1);
         main.connect(gain);
         gain.connect(ctx.destination);
 
         ctx.suspend();
 
+        src.loop = true;
+        src.onended = () => {
+            const duration = src.buffer.duration;
+            const time = ctx.currentTime;
+
+            if (time >= duration) {
+                this.stop();
+            }
+        };
+
         this.nodes.context = ctx;
         this.nodes.source = src;
         this.nodes.worklet = worklet;
-
-        await this.fillBuffer(file, ctx, src, callback);
     },
 
     /**

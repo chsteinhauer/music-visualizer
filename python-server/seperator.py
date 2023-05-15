@@ -3,18 +3,17 @@ import torch
 import torchaudio as ta
 import numpy as np
 import soundfile
+import os
+
 from demucs import pretrained
 from demucs.apply import apply_model
-import noisereduce as nr
-import glob
-import os
 
 from torchaudio.pipelines import HDEMUCS_HIGH_MUSDB_PLUS
 
 
 def separate_sources_generator(
-        _mix,
-        sample_rate,
+    _mix,
+    sample_rate,
 ):
     # this section is kindly inspired by torchaudio's own tutorial:
     # https://pytorch.org/audio/main/tutorials/hybrid_demucs_tutorial.html
@@ -79,6 +78,9 @@ def separate_sources_generator(
 
 
 
+#### Deprecated: Code below was used to make example files 
+#### in the "./samples" folder
+
 def setup_pretrained_model():
     torch.hub.set_dir('./models/')
 
@@ -104,7 +106,7 @@ def seperate_sources_wav(model, mix):
     
 
 def generate_samples():
-    snippets = os.listdir("./python-server/snippets/")#glob.glob("./python-server/snippets/*.wav")
+    snippets = os.listdir("./python-server/snippets/")
     print(snippets)
 
     model = setup_pretrained_model()

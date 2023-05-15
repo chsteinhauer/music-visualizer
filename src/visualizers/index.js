@@ -6,7 +6,7 @@ import { setupTestaaa, drawTestaaa } from './lau.js';
 var fsetup = [setupBasic, setupTestaaa];
 var fdraw = [drawBasic, drawTestaaa];
 
-let index = 0; 
+let index = 1; 
 
 function _setup() {
     fsetup[index]()

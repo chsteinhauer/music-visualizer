@@ -1,11 +1,12 @@
 import "p5js-wrapper";
 import 'p5js-wrapper/sound';
 import "../assets/libraries/polar/polar.min.js";
-import { State } from "./model/state";
+import { State } from "./components/state.js";
 import { _setup, _draw, _windowResized } from "./visualizers";
 import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
 import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
+import { getSampleNames } from "./utils/api.js";
 
 let _loading = true;
 let _hoverPlaybar = false;
@@ -28,7 +29,7 @@ window.setup = async () => {
 
         setupLoading();
         setupWorker();
-        setupUIComponents();
+        await setupUIComponents();
 
         _loading = false;
     } catch (err) {
@@ -60,7 +61,9 @@ function setupWorker() {
 
     worker.onmessage = (msg) => {
         const freqs = msg.data;
-        State.sources.forEach((s,i) => s.frequency = freqs[i]);//s.frequencyQueue.push(freqs[i]));
+        State.sources.forEach((s,i) => { 
+            s.frequency = freqs[i];
+        });//s.frequencyQueue.push(freqs[i]));
     };
 
     // Send FreeQueue instance and atomic state to worker.
@@ -70,7 +73,7 @@ function setupWorker() {
     });
 }
 
-function setupUIComponents() {
+async function setupUIComponents() {
     // Playerbar
     const bar = document.querySelector('#playbar');
     bar.addEventListener("mouseleave", (e) => {
@@ -85,13 +88,38 @@ function setupUIComponents() {
     const imp = document.querySelector('#import');
     imp.addEventListener('click', () => importFile());
 
+
     // Play/pause button
     const toggle = document.querySelector('#toggle-play');
     toggle.addEventListener('click', async () => { 
         await Player.toggleButtonClickHandler();
     });
-    toggle.disabled = true
+    toggle.disabled = true;
     toggle.classList.add("disabled");
+
+    const select = document.querySelector('#examples');
+    const files = await getSampleNames();
+    console.log(files);
+    for (const file of files) {
+        select.add(new Option(file));
+    }
+    select.addEventListener("change", async (e) => {
+        const file = e.target.value;
+
+        Player.stop();
+        toggle.disabled = true;
+        toggle.classList.add("disabled");
+
+        console.log(file)
+
+        await Player.setupFromExample(file, () => {
+            toggle.disabled = false;
+            toggle.classList.remove("disabled");
+            _hoverPlaybar = false;
+
+            _setup();
+        })
+    });
 
     // Fullscreen button
     const fscreen = document.querySelector('#fullscreen');
@@ -128,7 +156,7 @@ function importFile() {
 
         const toggle = document.querySelector('#toggle-play');
 
-        await Player.setupContext(file, () => {
+        await Player.setupFromFile(file, () => {
             toggle.disabled = false;
             toggle.classList.remove("disabled");
             _hoverPlaybar = false;

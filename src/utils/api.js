@@ -10,6 +10,28 @@ export async function getSourceNames() {
     return res.json();
 }
 
+
+export async function getSampleNames() {
+    const res = await fetch("http://localhost:3000/samplenames", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+    return res.json();
+}
+
+export async function getSample(ctx, file_name) {
+    return fetch("http://localhost:3000/samples/" + file_name, {
+            method: "POST",
+            headers: {
+                "Content-Type": "audio/wav"
+            },
+        })
+        .then((res) => res.arrayBuffer())
+        .then((buf) => ctx.decodeAudioData(buf));
+}
+
 /**
  * @param {File} file 
  * @returns sample rate
@@ -39,8 +61,7 @@ export async function setAudioBuffer(ctx, src, file) {
 
     reader.onload = async (e) => {
         const original = await ctx.decodeAudioData(e.target.result);
-        const buffer = ctx.createBuffer(10, file.size, ctx.sampleRate);
-
+        const buffer = ctx.createBuffer(10, original.length, ctx.sampleRate);
         buffer.getChannelData(8).set(original.getChannelData(0));
         buffer.getChannelData(9).set(original.getChannelData(1));
 

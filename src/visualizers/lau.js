@@ -1,4 +1,4 @@
-import { State } from "../model/state";
+import { State } from "../components/state";
 
 let isReady = false;
 let marN = 4; // n of marioni present

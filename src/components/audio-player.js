@@ -139,7 +139,7 @@ export const Player = {
 
             // setup analyser
             const analyser = ctx.createAnalyser();
-            analyser.fftSize = 64;
+            analyser.fftSize = 1024;
             analyser.minDecibels = -50;
             analyser.maxDecibels = -10;
             analyser.smoothingTimeConstant = 0.75;

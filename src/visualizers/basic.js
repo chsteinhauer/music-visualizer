@@ -1,4 +1,4 @@
-import { config } from "../model/config.js";
+import { config } from "../static/config.js";
 import { State } from "../components/state.js";
 
 let pos;
@@ -22,7 +22,6 @@ function drawBasic() {
 
     background(255);
 
-    const sources = config.sources;
     for (const [i, c] of config.sources.entries()) {
         const s = State.sources.find((_s) => _s.title === c.title);
         const data = State.getByteSpectrum(s);

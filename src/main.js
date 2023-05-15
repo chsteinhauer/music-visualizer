@@ -7,9 +7,10 @@ import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
 import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
 import { getSampleNames } from "./utils/api.js";
+import { config } from "./static/config.js";
 
 let _loading = true;
-let _hoverPlaybar = false;
+let _hoverControls = false;
 let _fs = false;
 let _file;
 
@@ -77,11 +78,11 @@ async function setupUIComponents() {
     // Playerbar
     const bar = document.querySelector('#playbar');
     bar.addEventListener("mouseleave", (e) => {
-        _hoverPlaybar = false;
+        _hoverControls = false;
     });
     bar.addEventListener("mouseover", () => {
         clearTimeouts();
-        _hoverPlaybar = true;
+        _hoverControls = true;
     });
 
     // File explorer button
@@ -97,13 +98,13 @@ async function setupUIComponents() {
     toggle.disabled = true;
     toggle.classList.add("disabled");
 
-    const select = document.querySelector('#examples');
+    // Select examples dropdown
+    const examples = document.querySelector('#examples');
     const files = await getSampleNames();
-    console.log(files);
     for (const file of files) {
-        select.add(new Option(file));
+        examples.add(new Option(file));
     }
-    select.addEventListener("change", async (e) => {
+    examples.addEventListener("change", async (e) => {
         const file = e.target.value;
 
         Player.stop();
@@ -115,11 +116,22 @@ async function setupUIComponents() {
         await Player.setupFromExample(file, () => {
             toggle.disabled = false;
             toggle.classList.remove("disabled");
-            _hoverPlaybar = false;
+            _hoverControls = false;
             _file = file;
 
             _setup();
         })
+    });
+
+    // Select visualizer dropdown
+    const visualizers = document.querySelector('#visualizers');
+    for (const visualizer of config.visualizers) {
+        visualizers.add(new Option(visualizer.title));
+    }
+    visualizers.addEventListener("change", async (e) => {
+        const title = e.target.value;
+
+        _setup(title);
     });
 
     // Fullscreen button
@@ -130,22 +142,27 @@ async function setupUIComponents() {
 onmousemove = (e) => {
     if (!_file) return;
 
-    const bar = document.querySelector('#playbar');
+    const controls = document.getElementsByClassName("controls");
 
-    if (bar.classList.contains("hide")) {
-        bar.classList.remove("hide");
+    for (const control of controls) {
+        if (control.classList.contains("hide")) {
+            control.classList.remove("hide");
+        }
+        control.classList.add("show");
     }
-    bar.classList.add("show");
 
-    if (_hoverPlaybar) {
+    if (_hoverControls) {
         clearTimeouts();
         return;
     };
 
     setInterruptableTimeout(() => { 
-        bar.classList.remove("show");
-        bar.classList.add("hide");
+        for (const control of controls) {
+            control.classList.remove("show");
+            control.classList.add("hide");
+        }
     }, 2000)
+    
 };
 
 function importFile() {
@@ -160,7 +177,7 @@ function importFile() {
         await Player.setupFromFile(file, () => {
             toggle.disabled = false;
             toggle.classList.remove("disabled");
-            _hoverPlaybar = false;
+            _hoverControls = false;
             _file = file;
 
             _setup();

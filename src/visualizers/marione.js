@@ -5,7 +5,7 @@ let marN = 4; // n of marioni present
 let marAll = [];
 let colors = ['#FE6B85', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A'];
 
-function setupTestaaa() {
+function setupMarione() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
 
@@ -23,7 +23,7 @@ function setupTestaaa() {
     isReady = true;
 }
 
-function drawTestaaa() {
+function drawMarione() {
     if (!isReady) return;
 
     background('#222');
@@ -181,4 +181,4 @@ class Marione {
 
 }
 
-export { setupTestaaa, drawTestaaa }; 
+export { setupMarione, drawMarione }; 

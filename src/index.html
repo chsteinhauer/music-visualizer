@@ -7,11 +7,15 @@
 
     <body>
         <div class="wrapper">
-            <div id="settings" class="settings"></div>
 
             <div id='canvas' class="canvas"></div>
+
+            <div id="settings" class="settings controls">
+                Visualizer: 
+                <select id="visualizers" class="visualizers"></select>
+            </div>
             
-            <div id="playbar" class="playbar playbar-init">
+            <div id="playbar" class="playbar playbar-init controls">
                 <div class="playbar-top">
                     <button id="import" class="button button-import">
                         <img src="icons/file-audio-regular.svg" class="icon"></img>
@@ -20,6 +24,7 @@
                     <select id="examples" class="examples">
                         <option class="placeholder" value="" disabled selected>Select example</option>
                     </select>
+
                 </div>
 
                 <div class="playbar-bottom">
@@ -36,7 +41,11 @@
                     </button>
                 </div>
             </div>
+
+           
         </div>
+
+        
 
         <script src="./utils/coi-serviceworker.js"></script>
         <script type="module" src="main.js"></script>

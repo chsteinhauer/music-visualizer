@@ -3,7 +3,7 @@ import url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
 import { getSample, getSampleRate, setAudioBuffer, stream } from "../utils/api";
-import { config } from "../model/config";
+import { config } from "../static/config";
 import { append } from "../utils/utils";
 
 const nodes = {

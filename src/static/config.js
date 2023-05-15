@@ -1,5 +1,26 @@
+import { drawBasic, setupBasic } from "../visualizers/basic";
+import { drawCircles, setupCircles } from "../visualizers/circles";
+import { drawMarione, setupMarione } from "../visualizers/marione";
 
 export const config = {
+    visualizers: [
+        {
+            title: "basic",
+            setup: setupBasic,
+            draw: drawBasic,
+        },
+        {
+            title: "marione",
+            setup: setupMarione,
+            draw: drawMarione,
+        },
+        {
+            title: "circles",
+            setup: setupCircles,
+            draw: drawCircles,
+        },
+    ],
+
     sources: [
         {
             title: "vocals",

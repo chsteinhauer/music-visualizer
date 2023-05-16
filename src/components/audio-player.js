@@ -45,7 +45,7 @@ export const Player = {
             this.nodes.context.close();
 
         State.setState("pause");
-        select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
+        select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
     },
 
     /**
@@ -191,10 +191,10 @@ export const Player = {
     async toggleButtonClickHandler() {
         if (!State.isStreaming()) {
             this.start();
-            select('#toggle-play').html('<img src="icons/pause.svg" class="icon"></img>');
+            select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
         } else {
             this.pause();
-            select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
+            select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
         }
     },
 }

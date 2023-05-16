@@ -26,4 +26,78 @@ export const config = {
             cutoff: 10000,
         }
     ],
+
+    examples: [
+        {
+            title: "alvanoto",
+            genre: "noise",
+
+        }, 
+
+        {
+            title: "augustgreene",
+            genre: "r&b",
+
+        },
+
+        {
+            title: "berio",
+            genre: "electronic music",
+
+        },
+        
+        {
+            title: "donaldbyrd",
+            genre: "jazz",
+
+        },
+
+        {
+            title: "berio",
+            genre: "electronic music",
+
+        },
+        
+        {
+            title: "duranduran",
+            genre: "new wave",
+
+        },
+        
+        {
+            title: "fktwigs",
+            genre: "avant-pop",
+
+        },
+        
+        {
+            title: "gnarls",
+            genre: "soul",
+
+        },
+        
+        {
+            title: "opeth",
+            genre: "metal",
+
+        },
+        
+        {
+            title: "saariaho",
+            genre: "contemporary music",
+
+        },
+
+        {
+            title: "whatalife",
+            genre: "pop",
+
+        },
+        
+        
+
+    ],
+
+
 };
+

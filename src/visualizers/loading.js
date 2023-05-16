@@ -3,13 +3,16 @@ import { State } from "../components/state";
 var countdown = 200;
 
 function setupLoading() {
+
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
-    background(255);
-
+    clear();
     noFill();
     ellipseMode(CENTER);
-    stroke(0, 20);
+    stroke('hsla(0, 0%, 100%, 0.4)');
+    drawingContext.shadowColor = ('#0073b6');
+    drawingContext.shadowBlur = 10;
+  
 }
 
 function drawLoading(loading = true, callback) {

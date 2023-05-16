@@ -31,7 +31,7 @@ function drawBasic() {
 }
 
 function drawShape(data, source, index) {
-    const p = 20;
+    const p = 200;
     // line
     push();
     beginShape();
@@ -46,7 +46,7 @@ function drawShape(data, source, index) {
     // text
     push()
     fill(0, 102, 153, 51);
-    text(source.title, width - 100, pos[index] - 10);
+    text(source.title, width - p - 35, pos[index] - 10);
     pop()
 }
 

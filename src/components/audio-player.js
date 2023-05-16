@@ -131,25 +131,27 @@ export const Player = {
         worklet.disconnect();
 
         // Connect analyser to each source channel
-        for (const [i, s] of config.sources.entries()) {
+        for (const [i, s] of State.sources.entries()) {
+            const _config = config.sources.find(c => c.title === s.title);
+
             // setup low pass
             const filter = ctx.createBiquadFilter();
             filter.type = "lowpass";
-            filter.frequency.value = s.cutoff;
+            filter.frequency.value = _config.cutoff;
 
             // setup analyser
             const analyser = ctx.createAnalyser();
-            analyser.fftSize = 1024;
-            analyser.minDecibels = -50;
-            analyser.maxDecibels = -10;
-            analyser.smoothingTimeConstant = 0.75;
+            analyser.fftSize = _config.fftSize;
+            analyser.minDecibels = _config.minDecibels;
+            analyser.maxDecibels = _config.maxDecibels;
+            analyser.smoothingTimeConstant = _config.smoothingTimeConstant;
 
             const merge = ctx.createChannelMerger(1);
 
             // init state properties
-            State.sources[i].analyser = analyser;
-            State.sources[i].byteBuffer = new Uint8Array(analyser.frequencyBinCount);
-            State.sources[i].floatBuffer = new Float32Array(analyser.frequencyBinCount);
+            s.analyser = analyser;
+            s.byteBuffer = new Uint8Array(analyser.frequencyBinCount);
+            s.floatBuffer = new Float32Array(analyser.frequencyBinCount);
 
             const channel = i * 2;
             splitter.connect(merge, channel, 0);

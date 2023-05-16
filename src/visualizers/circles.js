@@ -10,6 +10,7 @@ function setupCircles() {
     canvas.parent("canvas");
     noStroke();
     ellipseMode(CENTER);
+    background(255);
 
     const N = State.sources.length;
     interval = height / (N + 1);
@@ -31,9 +32,9 @@ function drawCircles() {
 }
 
 function drawShape(data, source, index) {
-    const p = 20;
+    const p = 200;
     
-    // line
+    // circles
     push();
     for (let i = 0; i < data.length; i++) {
         const x = map(log(i), 0, log(data.length), p, width-p);
@@ -48,10 +49,8 @@ function drawShape(data, source, index) {
 
     // text
     push()
-    fill(50, 15);
-
     fill(0, 102, 153, 51);
-    text(source.title, width - 100, pos[index] - 10);
+    text(source.title, width - p - 35, pos[index] - 10);
     pop()
 }
 

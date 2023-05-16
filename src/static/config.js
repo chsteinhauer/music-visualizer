@@ -1,9 +1,15 @@
 import { drawBasic, setupBasic } from "../visualizers/basic";
 import { drawCircles, setupCircles } from "../visualizers/circles";
+import { drawConfetti, setupConfetti } from "../visualizers/confetti";
 import { drawMarione, setupMarione } from "../visualizers/marione";
 
 export const config = {
     visualizers: [
+        {
+            title: "confetti",
+            setup: setupConfetti,
+            draw: drawConfetti,
+        },
         {
             title: "basic",
             setup: setupBasic,

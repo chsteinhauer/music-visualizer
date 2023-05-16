@@ -23,15 +23,15 @@ function drawBasic() {
     background(255);
 
     const sources = config.sources;
-    for (const [i, s] of State.sources.entries()) {
+    for (const [i, c] of config.sources.entries()) {
+        const s = State.sources.find((_s) => _s.title === c.title);
         const data = State.getByteSpectrum(s);
-
-        const c = sources[i];
-        drawShape(data, s, c, i);
+        
+        drawShape(data, s, i);
     }
 }
 
-function drawShape(data, source, config, index) {
+function drawShape(data, source, index) {
     const p = 20;
     // line
     push();

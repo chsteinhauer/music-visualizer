@@ -5,7 +5,7 @@ import { State } from "./components/state.js";
 import { _setup, _draw, _windowResized } from "./visualizers";
 import { Player } from "./components/audio-player.js";
 import { setupLoading, drawLoading } from "./visualizers/loading.js";
-import { clearTimeouts, setInterruptableTimeout } from "./utils/utils.js";
+import { clearTimeouts, setInterruptableTimeout, shuffle } from "./utils/utils.js";
 import { getSampleNames } from "./utils/api.js";
 import { config } from "./static/config.js";
 
@@ -13,6 +13,11 @@ let _loading = true;
 let _hoverControls = false;
 let _fs = false;
 let _file;
+
+let _active = false;
+let _samples = [];
+let _visualizers = [];
+let _list = [];
 
 
 window.windowResized = () => {
@@ -32,23 +37,50 @@ window.setup = async () => {
         setupWorker();
         await setupUIComponents();
 
+        if (State.isTesting) {
+            shuffle(_samples);
+            shuffle(_visualizers);
+
+            _list = _visualizers.flatMap(v => _samples.map(s => { 
+                return { 
+                    sample: s,
+                    visualizer: v,
+                }
+            }));
+
+            shuffle(_list);
+
+            console.log(_list);
+            
+        }
+
         _loading = false;
     } catch (err) {
         console.error(err);
     }
 }
 
-window.draw = () => {
+window.draw = async () => {
+    
     try {
-        if (State.isLoading()) {
-            drawLoading(_loading, () => {
-                const bar = document.querySelector('#playbar');
+        if (State.isTesting) {
 
-                bar.classList.remove("playbar-init");
-                bar.classList.add("show");
-            });
-        } else if (State.isStreaming()) {
-            _draw();
+            if (State.isStreaming()) {
+                _draw();
+            } else if (!_loading) {
+                
+            }
+        } else {
+            if (State.isLoading()) {
+                drawLoading(_loading, () => {
+                    const bar = document.querySelector('#playbar');
+    
+                    bar.classList.remove("playbar-init");
+                    bar.classList.add("show");
+                });
+            } else if (State.isStreaming()) {
+                _draw();
+            }
         }
     } catch (err) {
         console.error(err);
@@ -103,6 +135,7 @@ async function setupUIComponents() {
     const files = await getSampleNames();
     for (const file of files) {
         examples.add(new Option(file));
+        _samples.push(file);
     }
     examples.addEventListener("change", async (e) => {
         const file = e.target.value;
@@ -127,6 +160,7 @@ async function setupUIComponents() {
     const visualizers = document.querySelector('#visualizers');
     for (const visualizer of config.visualizers) {
         visualizers.add(new Option(visualizer.title));
+        _visualizers.push(visualizer.title);
     }
     visualizers.addEventListener("change", async (e) => {
         const title = e.target.value;
@@ -184,4 +218,36 @@ function importFile() {
         });
     };
     input.click();
+}
+
+onkeyup = async (e) => {
+    if (e.key == " " ||
+        e.code == "Space" ||      
+        e.keyCode == 32      
+    ) {
+        if (!State.isTesting) return;
+        console.log(Player.hasEnded());
+        if (Player.hasEnded()) {
+            Player.stop();
+            _file = "test";
+
+            if (_list.length > 0) {
+                const test = _list.splice(0, 1)[0];
+
+                console.log(test.sample, test.visualizer);
+
+                await Player.setupFromExample(test.sample, () => {
+                    _setup(test.visualizer);
+
+                    Player.start();
+                });
+            }
+        }
+    }
+
+    if (e.key == "f" ||
+        e.code == "KeyF"    
+    ) {
+        fullscreen(true);
+    }
 }

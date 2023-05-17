@@ -33,16 +33,17 @@ function drawCircles() {
 
 function drawShape(data, source, index) {
     const p = 200;
+    const color = palette1.rgb[(3 - index) + 5];
     
     // circles
     push();
     for (let i = 0; i < data.length; i++) {
         const x = map(log(i), 0, log(data.length), p, width-p);
         const y = pos[index];
-        const r = map(data[i], 0, 255, 1, 100);
+        const r = map(data[i], 0, 255, 1, 120);
         
         const c = map(data[i], 0, 255, 15, 110);
-        fill(...palette1.rgb[index], c);
+        fill(...color, c);
         ellipse(x, y, r);
     }
     pop();

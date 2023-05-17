@@ -1,5 +1,8 @@
 import { State } from "../components/state";
+import { palette1 } from "../static/palettes";
 
+let pos;
+let interval;
 let isReady = false;
 let marN = 4; // n of marioni present
 let marAll = [];
@@ -9,58 +12,38 @@ function setupMarione() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
 
+    const N = State.sources.length;
+    interval = width / (N + 2);
+    pos = new Array(N).fill(interval).map((x, i) => x * (i + 1));
+
     for (let i = 0; i < marN; i++) {
 
         //x    y    r  n    a  
-        let mar = new Marione(100, 100, 50, 5, -90);
+        let mar = new Marione(interval - interval/2 + pos[i], height/2, 50, 5, -90);
         marAll.push(mar);
     }
 
     noStroke();
-    frameRate(60);
-    background('#222');
+    background(0);
 
     isReady = true;
+
+    
 }
 
 function drawMarione() {
     if (!isReady) return;
 
-    background('#222');
-    translate(width/2, height/2);
-
-    // push();
-    // fill(255);
-    // rect(0,0,10,10);
-    // pop();
-
-
-    //for (let i = 0; i < marN; i++) {
+    background(0);
     for (const [i, s] of State.sources.entries()) {
 
         push();
-        rotate(TWO_PI * i / marN);
+        const level = State.getLevel(s);
+        const r = map(level, 0, 1, 40, 60);
 
-        let x = 0.1; //random(-width, width) / width + 0.005;
-        let y = 0.1; //random(-height, height) / height - 0.005;
         marAll[i].drawGradient(colors[i % 10]);
-        marAll[i].drawShape();
-        marAll[i].moveShape(0, 0);
-        
-
-
-        const data = State.getFloatWaveform(s);
-        for (let j = 0; j < data.length; j++) {
-            if (!isFinite(data[j])) return;
-            //const x = sin(data[j]);
-            //const y = cos(data[j]);
-            const p = map(data[j], -200, 0, -0.1, 1);
-
-            marAll[i].test(j % marAll[i].nodes,p,p);
-            //marAll[i].moveShape(x, y);
-            //curveTightness(p);
-        }
-
+        marAll[i].drawShape(r);
+        marAll[i].moveShape(0,0);
         pop();
     }
 }
@@ -110,7 +93,9 @@ class Marione {
         
     }
 
-    drawShape() {
+    drawShape(r) {
+
+        this.radius = r;
 
         //  calculate node  starting locations
         for (let i = 0; i < this.nodes; i++) {
@@ -126,10 +111,10 @@ class Marione {
         for (let i = 0; i < this.nodes; i++) {
             curveVertex(this.nodeX[i], this.nodeY[i]);
         }
-        for (let i = 0; i < this.nodes - 1; i++) {
-            curveVertex(this.nodeX[i], this.nodeY[i]);
+        // for (let i = 0; i < this.nodes - 1; i++) {
+        //     curveVertex(this.nodeX[i], this.nodeY[i]);
 
-        }
+        // }
         endShape(CLOSE);
     }
 
@@ -178,7 +163,6 @@ class Marione {
             this.angle[i] += this.frequency[i];
         }
     }
-
 }
 
 export { setupMarione, drawMarione }; 

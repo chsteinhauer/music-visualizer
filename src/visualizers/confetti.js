@@ -68,13 +68,13 @@ function drawShape(data, radius, color, s, index) {
     const r = map(log(radius), 0, log(height/2), 0, 1);
 
     noStroke();
-    const _color = [color[0], color[1]+random(-40, 10), color[2]];
+    const _color = [color[0], color[1]+random(-0, 10), color[2]];
     for (let i = 0; i < data.length; ++i) {
 
         const m = map(log(i), 0, log(data.length), 0, PI);
         const d = map(data[i], 0, 255, 0, 1);
 
-        const x = (cos(m) * radius / 2);
+        const x = (cos(m) * radius / 2) * s;
         const y = (sin(m) * radius / 2) * s;
 
         if (d > 0.01) {

@@ -39,10 +39,12 @@ export const Player = {
     },
 
     stop() {
-        if (this.nodes.source)
-            this.nodes.source.stop();
-        if (this.nodes.context)
+        // if (this.nodes.source)
+        //     this.nodes.source.stop();
+        if (this.nodes.context) {
+            this.nodes.context.suspend();
             this.nodes.context.close();
+        }
 
         State.setState("pause");
         select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
@@ -172,14 +174,15 @@ export const Player = {
 
         ctx.suspend();
 
-        src.loop = true;
+        src.loop = !State.isTesting;
         src.onended = () => {
             const duration = src.buffer.duration;
             const time = ctx.currentTime;
 
-            if (time >= duration) {
-                this.stop();
-            }
+            //if (time >= duration) {
+                //this.stop();
+
+            //}
         };
 
         this.nodes.context = ctx;
@@ -199,5 +202,15 @@ export const Player = {
             select('#toggle-play').html('<img src="icons/play.svg" class="icon"></img>');
         }
     },
+
+    hasEnded() {
+        if (!this.nodes.source || !this.nodes.context) return true;
+        const duration = this.nodes.source.buffer.duration;
+        const time = this.nodes.context.currentTime;
+
+        console.log(duration, time);
+
+        return duration < time;
+    }
 }
 

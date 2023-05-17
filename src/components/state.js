@@ -1,6 +1,7 @@
-// make smoothning
-
-
+const MODE = {
+    DEFAULT: 0,
+    TEST: 1,
+}
 
 const AudioType = {
     None: 0,
@@ -80,6 +81,7 @@ export const State = {
     state: AudioState.Setup,
     type: AudioType.None,
     sources: [],
+    isTesting: true,
 
     getByteWaveform,
     getFloatWaveform,

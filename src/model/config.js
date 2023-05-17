@@ -52,11 +52,6 @@ export const config = {
 
         },
 
-        {
-            title: "berio",
-            genre: "electronic music",
-
-        },
         
         {
             title: "duranduran",

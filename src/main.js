@@ -14,7 +14,6 @@ let _hoverControls = false;
 let _fs = false;
 let _file;
 
-let _active = false;
 let _samples = [];
 let _visualizers = [];
 let _list = [];
@@ -74,9 +73,12 @@ window.draw = async () => {
             if (State.isLoading()) {
                 drawLoading(_loading, () => {
                     const bar = document.querySelector('#playbar');
+                    const sett = document.querySelector('#settings');
     
                     bar.classList.remove("playbar-init");
+                    sett.classList.remove("playbar-init");
                     bar.classList.add("show");
+                    sett.classList.add("show");
                 });
             } else if (State.isStreaming()) {
                 _draw();

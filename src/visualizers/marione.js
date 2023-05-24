@@ -39,7 +39,7 @@ function drawMarione() {
 
         push();
         const level = State.getLevel(s);
-        const r = map(level, 0, 1, 40, 60);
+        const r = map(level, 0, 1, 40, 68);
 
         marAll[i].drawGradient(colors[i % 10]);
         marAll[i].drawShape(r);

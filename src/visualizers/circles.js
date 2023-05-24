@@ -11,6 +11,8 @@ function setupCircles() {
     noStroke();
     ellipseMode(CENTER);
     background(255);
+    drawingContext.shadowColor = ('#0073b6');
+    drawingContext.shadowBlur = 1;
 
     const N = State.sources.length;
     interval = height / (N + 1);

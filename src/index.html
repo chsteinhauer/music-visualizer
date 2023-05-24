@@ -2,24 +2,31 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round"
+      rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="./styles/main.scss">
     </head>
 
     <body>
+
         <div class="wrapper">
 
             <div id='canvas' class="canvas"></div>
 
             <div id="settings" class="settings controls playbar-init">
-                Visualizer: 
-                <select id="visualizers" class="visualizers"></select>
+                <select id="visualizers" class="visualizers">
+                    <option class="placeholder" value="" disabled selected>Select visualizer</option>
+                </select>
             </div>
             
             <div id="playbar" class="playbar playbar-init controls">
                 <div class="playbar-top">
                     <button id="import" class="button button-import">
-                        <img src="icons/file-audio-regular.svg" class="icon"></img>
-                    </button>
+                        <span class="material-icons-round">
+                            file_upload
+                            </span>
+                    </button> 
 
                     <select id="examples" class="examples">
                         <option class="placeholder" value="" disabled selected>Select example</option>
@@ -28,15 +35,24 @@
 
                 <div class="playbar-bottom">
                     <button id="volume" class="button button-control transparent">
-                        <img src="icons/volume-high.svg" class="icon"></img>
+                        <span class="material-icons-round">
+                            volume_up
+                            </span>
+                            
                     </button>
 
-                    <button id="toggle-play" class="button button-control">
-                        <img src="icons/play.svg" class="icon"></img>
+                    <button id="toggle-play" class="button button-control button-play">
+                        <span class="material-icons-round">
+                            play_arrow
+                            </span>
+                            
+                            
                     </button>
 
                     <button id="fullscreen" class="button button-control transparent">
-                        <img src="icons/expand.svg" class="icon"></img>
+                        <span class="material-icons-round">
+                            fullscreen
+                            </span>
                     </button>
                 </div>
             </div>

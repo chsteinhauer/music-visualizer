@@ -4,13 +4,15 @@ import { State } from "../components/state.js";
 let pos;
 let interval;
 
-const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
 function setupBasic() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
     noFill();
     stroke(0, 50);
+
+    background(255);
+    drawingContext.shadowColor = ('#0073b6');
+    drawingContext.shadowBlur = 1;
 
     const N = State.sources.length;
     interval = height / (N + 1);

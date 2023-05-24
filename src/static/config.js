@@ -6,11 +6,6 @@ import { drawMarione, setupMarione } from "../visualizers/marione";
 export const config = {
     visualizers: [
         {
-            title: "confetti",
-            setup: setupConfetti,
-            draw: drawConfetti,
-        },
-        {
             title: "basic",
             setup: setupBasic,
             draw: drawBasic,
@@ -24,6 +19,11 @@ export const config = {
             title: "circles",
             setup: setupCircles,
             draw: drawCircles,
+        },
+        {
+            title: "confetti",
+            setup: setupConfetti,
+            draw: drawConfetti,
         },
     ],
 
@@ -60,5 +60,51 @@ export const config = {
             maxDecibels: -10,
             smoothingTimeConstant: 0.6,
         }
+    ],
+    examples: [
+        {
+            title: "alvanoto",
+            genre: "noise",
+        }, 
+        {
+            title: "augustgreene",
+            genre: "r&b",
+        },
+        {
+            title: "berio",
+            genre: "electronic music",
+        },
+        {
+            title: "donaldbyrd",
+            genre: "jazz",
+        },
+        {
+            title: "duranduran",
+            genre: "new wave",
+        },
+        {
+            title: "fktwigs",
+            genre: "avant-pop",
+
+        },
+        {
+            title: "gnarls",
+            genre: "soul",
+
+        },
+        {
+            title: "opeth",
+            genre: "metal",
+
+        },
+        {
+            title: "saariaho",
+            genre: "contemporary music",
+
+        },
+        {
+            title: "whatalife",
+            genre: "pop",
+        },
     ],
 };

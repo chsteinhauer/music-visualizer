@@ -5,11 +5,14 @@ var countdown = 200;
 function setupLoading() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
-    background(255);
-
+    clear();
     noFill();
     ellipseMode(CENTER);
-    stroke(0, 20);
+    background(255);
+    stroke('hsla(0, 0%, 100%, 0.4)');
+    drawingContext.shadowColor = ('#0073b6');
+    drawingContext.shadowBlur = 8;
+  
 }
 
 function drawLoading(loading = true, callback) {
@@ -20,16 +23,9 @@ function drawLoading(loading = true, callback) {
     }
 }
 
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-}
-
 function transitionLoadingScreen(callback) {
-    //stroke(0, 20);
-
     const p = (1 / countdown--);
     const mul = 7 * p;
-    //fill(255, 100 * p);
 
     var ang1 = TWO_PI * noise(0.01 * frameCount + 10);
     var ang2 = TWO_PI * noise(0.01 * frameCount + 20);

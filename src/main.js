@@ -227,6 +227,7 @@ onkeyup = async (e) => {
         e.code == "Space" ||      
         e.keyCode == 32      
     ) {
+        console.log(Player.nodes.context.outputLatency, Player.nodes.context.baseLatency, Player.nodes.context.outputLatency - Player.nodes.context.baseLatency);
         if (!State.isTesting) return;
         console.log(Player.hasEnded());
         if (Player.hasEnded()) {

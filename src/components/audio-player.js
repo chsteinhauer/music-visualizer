@@ -64,8 +64,6 @@ export const Player = {
         console.log("begin buffering...");
         let streaming = false;
 
-        const buffering = (load) => (load / file.size) * 100;
-
         let loaded = 0;
         for await (const chunk of stream(file, ctx)) {
             const length = chunk.length;
@@ -81,7 +79,7 @@ export const Player = {
                 streaming = true;
                 callback();
 
-                console.log("ready!");
+                console.log("ready to play!");
             }
         }
 

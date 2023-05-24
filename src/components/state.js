@@ -81,7 +81,7 @@ export const State = {
     state: AudioState.Setup,
     type: AudioType.None,
     sources: [],
-    isTesting: true,
+    isTesting: false,
 
     getByteWaveform,
     getFloatWaveform,
@@ -114,11 +114,7 @@ export const State = {
             type: null,
             // fundemental frequency
             frequency: null,
-
-            frequencyQueue: [],
-            // harmonic overtones
-            overtones: [],
-    
+                        
             buffer: null,
             // AnalyserNode for this source
             analyser: null,

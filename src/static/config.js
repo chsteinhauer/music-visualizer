@@ -30,8 +30,6 @@ export const config = {
     sources: [
         {
             title: "vocals",
-            minPitch: 20,
-            maxPitch: 5000,
             cutoff: 2000,
             fftSize: 1024,
             minDecibels: -50,
@@ -40,8 +38,6 @@ export const config = {
         },
         {
             title: "other",
-            minPitch: 100,
-            maxPitch: 10000,
             cutoff: 10000,
             fftSize: 1024,
             minDecibels: -50,
@@ -50,9 +46,7 @@ export const config = {
         },
         {
             title: "bass",
-            minPitch: 20,
-            maxPitch: 1000,
-            cutoff: 400,
+            cutoff: 500,
             fftSize: 1024,
             minDecibels: -50,
             maxDecibels: -10,
@@ -60,8 +54,6 @@ export const config = {
         },
         {
             title: "drums",
-            minPitch: 20,
-            maxPitch: 10000,
             cutoff: 5000,
             fftSize: 1024,
             minDecibels: -50,

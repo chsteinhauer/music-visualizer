@@ -49,8 +49,10 @@ function drawConfetti() {
             drawShape(data, radius, color, -1, i);
         pop();
 
-        for (let j = particles[i].length - 1; j >= 0; j--) {
-            particles[i][j].update(level );
+        const amount = particles[i].length;
+        const test = level > 0.1 ? log(amount * 0.01 + level) * 0.15 : 0;
+        for (let j = amount - 1; j >= 0; j--) {
+            particles[i][j].update(level + test);
             particles[i][j].show();
             if (particles[i][j].finished()) {
                 particles[i].splice(j, 1);
@@ -82,7 +84,7 @@ function drawShape(data, radius, color, s, index) {
             particles[index].push(p);
         }
     }
-    
+
     pop();
 }
 

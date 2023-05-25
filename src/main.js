@@ -28,8 +28,24 @@ window.setup = async () => {
         }
 
         setupLoading();
-        setupWorker();
+        //setupWorker();
         await setupUIComponents();
+
+        if (State.isTesting) {
+            shuffle(_samples);
+            shuffle(_visualizers);
+
+            _list = _visualizers.flatMap(v => _samples.map(s => { 
+                return { 
+                    sample: s,
+                    visualizer: v,
+                }
+            }));
+
+            shuffle(_list);
+
+            console.log(_list);
+        }
 
         _loading = false;
     } catch (err) {
@@ -63,7 +79,7 @@ function setupWorker() {
         const freqs = msg.data;
         State.sources.forEach((s,i) => { 
             s.frequency = freqs[i];
-        });//s.frequencyQueue.push(freqs[i]));
+        });
     };
 
     // Send FreeQueue instance and atomic state to worker.
@@ -167,4 +183,36 @@ function importFile() {
         });
     };
     input.click();
+}
+
+onkeyup = async (e) => {
+    if (e.key == " " ||
+        e.code == "Space" ||      
+        e.keyCode == 32      
+    ) {
+        if (!State.isTesting) return;
+        console.log(Player.hasEnded());
+        if (Player.hasEnded()) {
+            Player.stop();
+            _file = "test";
+
+            if (_list.length > 0) {
+                const test = _list.splice(0, 1)[0];
+
+                console.log(test.sample, test.visualizer);
+
+                await Player.setupFromExample(test.sample, () => {
+                    _setup(test.visualizer);
+
+                    Player.start();
+                });
+            }
+        }
+    }
+
+    if (e.key == "f" ||
+        e.code == "KeyF"    
+    ) {
+        fullscreen(true);
+    }
 }

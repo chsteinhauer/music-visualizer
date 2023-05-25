@@ -30,8 +30,8 @@ def separate_sources_generator(
 
     print(mix[None].size())
 
-    segment: int = 5
-    overlap = 0.2
+    segment: int = 30
+    overlap = 0.01
 
     if device is None:
         device = mix.device

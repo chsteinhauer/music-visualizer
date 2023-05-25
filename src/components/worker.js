@@ -13,6 +13,9 @@ import * as Pitchfinder from "pitchfinder";
  */
 
 
+/**
+ * OBS: is not in use
+ */
 self.onmessage = async (msg) => {
     if (msg.data.type === "init") {
         let { inputQueue, outputQueue, atomicState } = msg.data.data;

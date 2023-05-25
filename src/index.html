@@ -11,11 +11,16 @@
     <body>
 
         <div class="wrapper">
-            <div id="settings" class="settings"></div>
 
             <div id='canvas' class="canvas"></div>
+
+            <div id="settings" class="settings controls playbar-init">
+                <select id="visualizers" class="visualizers">
+                    <option class="placeholder" value="" disabled selected>Select visualizer</option>
+                </select>
+            </div>
             
-            <div id="playbar" class="playbar playbar-init">
+            <div id="playbar" class="playbar playbar-init controls">
                 <div class="playbar-top">
                     <button id="import" class="button button-import">
                         <span class="material-icons-round">
@@ -36,7 +41,7 @@
                             
                     </button>
 
-                    <button id="toggle-play" class="button button-control">
+                    <button id="toggle-play" class="button button-control button-play">
                         <span class="material-icons-round">
                             play_arrow
                             </span>
@@ -51,7 +56,11 @@
                     </button>
                 </div>
             </div>
+
+           
         </div>
+
+        
 
         <script src="./utils/coi-serviceworker.js"></script>
         <script type="module" src="main.js"></script>

@@ -3,7 +3,7 @@ import url from "./visual-processor.js?url";
 import FreeQueue from "../utils/free-queue";
 import { QUEUE_SIZE } from "../static/constants";
 import { getSample, getSampleRate, setAudioBuffer, stream } from "../utils/api";
-import { config } from "../model/config";
+import { config } from "../static/config";
 import { append } from "../utils/utils";
 
 const nodes = {
@@ -39,10 +39,12 @@ export const Player = {
     },
 
     stop() {
-        if (this.nodes.source)
-            this.nodes.source.stop();
-        if (this.nodes.context)
+        // if (this.nodes.source)
+        //     this.nodes.source.stop();
+        if (this.nodes.context) {
+            this.nodes.context.suspend();
             this.nodes.context.close();
+        }
 
         State.setState("pause");
         select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
@@ -62,8 +64,6 @@ export const Player = {
         console.log("begin buffering...");
         let streaming = false;
 
-        const buffering = (load) => (load / file.size) * 100;
-
         let loaded = 0;
         for await (const chunk of stream(file, ctx)) {
             const length = chunk.length;
@@ -79,7 +79,7 @@ export const Player = {
                 streaming = true;
                 callback();
 
-                console.log("ready!");
+                console.log("ready to play!");
             }
         }
 
@@ -131,25 +131,27 @@ export const Player = {
         worklet.disconnect();
 
         // Connect analyser to each source channel
-        for (const [i, s] of config.sources.entries()) {
+        for (const [i, s] of State.sources.entries()) {
+            const _config = config.sources.find(c => c.title === s.title);
+
             // setup low pass
             const filter = ctx.createBiquadFilter();
             filter.type = "lowpass";
-            filter.frequency.value = s.cutoff;
+            filter.frequency.value = _config.cutoff;
 
             // setup analyser
             const analyser = ctx.createAnalyser();
-            analyser.fftSize = 1024;
-            analyser.minDecibels = -50;
-            analyser.maxDecibels = -10;
-            analyser.smoothingTimeConstant = 0.75;
+            analyser.fftSize = _config.fftSize;
+            analyser.minDecibels = _config.minDecibels;
+            analyser.maxDecibels = _config.maxDecibels;
+            analyser.smoothingTimeConstant = _config.smoothingTimeConstant;
 
             const merge = ctx.createChannelMerger(1);
 
             // init state properties
-            State.sources[i].analyser = analyser;
-            State.sources[i].byteBuffer = new Uint8Array(analyser.frequencyBinCount);
-            State.sources[i].floatBuffer = new Float32Array(analyser.frequencyBinCount);
+            s.analyser = analyser;
+            s.byteBuffer = new Uint8Array(analyser.frequencyBinCount);
+            s.floatBuffer = new Float32Array(analyser.frequencyBinCount);
 
             const channel = i * 2;
             splitter.connect(merge, channel, 0);
@@ -170,14 +172,15 @@ export const Player = {
 
         ctx.suspend();
 
-        src.loop = true;
+        src.loop = !State.isTesting;
         src.onended = () => {
             const duration = src.buffer.duration;
             const time = ctx.currentTime;
 
-            if (time >= duration) {
-                this.stop();
-            }
+            //if (time >= duration) {
+                //this.stop();
+
+            //}
         };
 
         this.nodes.context = ctx;
@@ -191,11 +194,21 @@ export const Player = {
     async toggleButtonClickHandler() {
         if (!State.isStreaming()) {
             this.start();
-            select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
+            select('#toggle-play').html('<span class="material-icons-round">pause</span>');
         } else {
             this.pause();
             select('#toggle-play').html('<span class="material-icons-round">play_arrow</span>');
         }
     },
+
+    hasEnded() {
+        if (!this.nodes.source || !this.nodes.context) return true;
+        const duration = this.nodes.source.buffer.duration;
+        const time = this.nodes.context.currentTime;
+
+        console.log(duration, time);
+
+        return duration < time;
+    }
 }
 

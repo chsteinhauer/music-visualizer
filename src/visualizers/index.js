@@ -1,20 +1,23 @@
-import { setupBasic, drawBasic } from './basic.js';
-import { drawExp, setupExp } from './experiment.js';
-import { setupTestaaa, drawTestaaa } from './lau.js';
-import { setupCircles, drawCircles } from './circles.js';
+import { config } from "../static/config";
 
+const visualizers = config.visualizers;
+let current = visualizers[0];
+let ready = false;
 
-var fsetup = [setupBasic, setupTestaaa, setupExp, setupCircles];
-var fdraw = [drawBasic, drawTestaaa, drawExp, drawCircles];
+function _setup(title = null) {
+    if (title) {
+        ready = false;
+        current = visualizers.find(v => v.title === title);
+    }
 
-let index = 1; 
-
-function _setup() {
-    fsetup[index]()
+    current.setup();
+    ready = true;
 }
 
 function _draw() {
-    fdraw[index]()
+    if (!ready) return;
+
+    current.draw();
 }
 
 function _windowResized() {

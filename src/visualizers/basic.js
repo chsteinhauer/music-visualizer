@@ -1,16 +1,18 @@
-import { config } from "../model/config.js";
+import { config } from "../static/config.js";
 import { State } from "../components/state.js";
 
 let pos;
 let interval;
-
-const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 function setupBasic() {
     const canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvas");
     noFill();
     stroke(0, 50);
+
+    background(255);
+    drawingContext.shadowColor = ('#0073b6');
+    drawingContext.shadowBlur = 1;
 
     const N = State.sources.length;
     interval = height / (N + 1);
@@ -22,7 +24,6 @@ function drawBasic() {
 
     background(255);
 
-    const sources = config.sources;
     for (const [i, c] of config.sources.entries()) {
         const s = State.sources.find((_s) => _s.title === c.title);
         const data = State.getByteSpectrum(s);
@@ -32,7 +33,7 @@ function drawBasic() {
 }
 
 function drawShape(data, source, index) {
-    const p = 20;
+    const p = 200;
     // line
     push();
     beginShape();
@@ -47,7 +48,7 @@ function drawShape(data, source, index) {
     // text
     push()
     fill(0, 102, 153, 51);
-    text(source.title, width - 100, pos[index] - 10);
+    text(source.title, width - p - 35, pos[index] - 10);
     pop()
 }
 

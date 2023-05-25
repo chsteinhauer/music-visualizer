@@ -1,6 +1,7 @@
-// make smoothning
-
-
+const MODE = {
+    DEFAULT: 0,
+    TEST: 1,
+}
 
 const AudioType = {
     None: 0,
@@ -80,6 +81,7 @@ export const State = {
     state: AudioState.Setup,
     type: AudioType.None,
     sources: [],
+    isTesting: false,
 
     getByteWaveform,
     getFloatWaveform,
@@ -112,11 +114,7 @@ export const State = {
             type: null,
             // fundemental frequency
             frequency: null,
-
-            frequencyQueue: [],
-            // harmonic overtones
-            overtones: [],
-    
+                        
             buffer: null,
             // AnalyserNode for this source
             analyser: null,
